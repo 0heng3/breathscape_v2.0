@@ -4,8 +4,6 @@ import DrawingCanvas from '../components/DrawingCanvas';
 import ElementToolBar from '../components/ElementToolBar';
 import FeedbackPanel from '../components/FeedbackPanel';
 import GardenStage from '../components/GardenStage';
-import { getTool } from '../data/tools';
-import { getToolElement } from '../data/toolElementMap';
 
 function CanvasPage({
   mood,
@@ -22,12 +20,10 @@ function CanvasPage({
   onFinish,
   onSuggest,
 }) {
-  const toolMeta = getToolElement(activeTool.id);
-
   return (
     <section className="screen canvas-page page-enter">
       <div className="garden-workbar">
-        <p>{feedback}</p>
+        <p>{feedback || '直接画你想到的小元素，系统会先识别，再整理成 QuickDraw 风格。'}</p>
       </div>
       <ElementToolBar activeToolId={activeTool.id} onSelectTool={onSelectTool} toolOrder={gardenDay.tools} />
       <div className="canvas-stage">
@@ -35,7 +31,7 @@ function CanvasPage({
           <DrawingCanvas activeTool={activeTool} onStroke={onStroke} onStrokeMove={onStrokeMove} />
           <div className="canvas-caption">
             <Volume2 size={18} />
-            <span>{toolMeta.feedbackText || activeTool.prompt}</span>
+            <span>直接画出来；下方图标是今天可识别的元素参考，不需要先点选。</span>
           </div>
         </GardenStage>
       </div>

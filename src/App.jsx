@@ -18,6 +18,7 @@ import { createStory } from './utils/storyGenerator';
 import { getToolElement } from './data/toolElementMap';
 import { getQuickDrawAssetVariant } from './data/quickdrawAssets';
 import { buildStampPlacements } from './utils/stampPlacement';
+import { recognizeSketchTool } from './utils/sketchRecognizer';
 
 const routes = ['/start', '/mood-scene', '/guide', '/garden', '/breath', '/diary-card', '/diary-list'];
 
@@ -124,7 +125,8 @@ function App() {
       return;
     }
 
-    const toolId = selectedTool || analyzed.tool;
+    const recognition = recognizeSketchTool(analyzed, gardenDay.tools, { fallbackToolId: selectedTool || analyzed.tool });
+    const toolId = recognition.toolId;
     const toolMeta = getToolElement(toolId);
     const recentTools = elementHistory.map((item) => item.tool);
     const stampPack = buildStampPlacements(analyzed, toolId, {
@@ -141,9 +143,11 @@ function App() {
       stampCount: stampPack.count,
       stamps: stampPack.placements,
       feedbackText: toolMeta.feedbackText,
+      recognition,
       quickdraw: {
         ...(analyzed.quickdraw || {}),
         placements: stampPack.placements,
+        recognition,
       },
     };
     const nextState = updateSceneState(toolId, strokeRecord, sceneState);
@@ -161,33 +165,40 @@ function App() {
       quickdrawDrawing: analyzed.drawing,
       quickdrawBoundingBox: analyzed.boundingBox,
       feedbackText: toolMeta.feedbackText,
+      recognition,
     }));
 
     setStrokes((current) => [...current, strokeRecord]);
     setElementHistory((current) => [...current, ...generated]);
     setSceneState(nextState);
-    setFeedback(toolMeta.feedbackText || createFeedback(toolId, nextState, recentTools));
+    setSelectedTool(toolId);
+    setFeedback(createRecognitionFeedback(recognition, toolMeta, nextState, recentTools));
     playElementTone(toolId, analyzed.speedAvg, muted);
   }
 
   function handleStrokeMove(event) {
     if (event.phase === 'end') return;
-    playLiveElementTone(event.tool, event, muted);
+    const liveRecognition = event.phase === 'move' && event.points?.length >= 8
+      ? recognizeSketchTool(event, gardenDay.tools, { fallbackToolId: selectedTool || event.tool })
+      : null;
+    const liveToolId = liveRecognition?.toolId || event.tool;
+    playLiveElementTone(liveToolId, { ...event, tool: liveToolId }, muted);
 
     if (event.phase !== 'move' || event.distance < 5) return;
     if (event.point.t - liveResponseLastAt.current < 55) return;
     liveResponseLastAt.current = event.point.t;
-    if (['wind', 'windLine', 'softWind', 'ribbon'].includes(event.tool)) {
-      updateLiveWind(event);
+    const recognizedEvent = { ...event, tool: liveToolId, recognition: liveRecognition };
+    if (['wind', 'windLine', 'softWind', 'ribbon'].includes(liveToolId)) {
+      updateLiveWind(recognizedEvent);
     }
-    updateLiveSceneEffects(event);
+    updateLiveSceneEffects(recognizedEvent);
     const id = `${event.id}-${Math.round(event.point.t)}`;
-    const liveY = getLiveResponseY(event.tool, event.point.y, event.canvasHeight);
-    const liveVariantIndex = getLiveVariantIndex(event);
-    const liveVariant = getQuickDrawAssetVariant(event.tool, liveVariantIndex);
+    const liveY = getLiveResponseY(liveToolId, event.point.y, event.canvasHeight);
+    const liveVariantIndex = getLiveVariantIndex({ ...event, tool: liveToolId });
+    const liveVariant = getQuickDrawAssetVariant(liveToolId, liveVariantIndex);
     const live = {
       id,
-      tool: event.tool,
+      tool: liveToolId,
       x: event.point.x,
       y: liveY,
       speed: event.speed,
@@ -199,13 +210,14 @@ function App() {
       stageHeight: event.stageRect?.height || event.canvasHeight,
       live: true,
       appearDelay: 0,
-      zone: skyTool(event.tool) ? 'sky' : groundTool(event.tool) ? 'ground' : 'any',
-      size: getLiveResponseSize(event.tool),
+      zone: skyTool(liveToolId) ? 'sky' : groundTool(liveToolId) ? 'ground' : 'any',
+      size: getLiveResponseSize(liveToolId),
       opacity: 0.82,
       animationType: 'draw',
       assetVariantIndex: liveVariantIndex,
       variantIndex: liveVariantIndex,
       assetPath: liveVariant?.assetPath,
+      recognition: liveRecognition,
     };
     if (!live.assetPath) return;
     setLiveResponses((current) => [...current.slice(-14), live]);
@@ -443,6 +455,17 @@ function groundTool(tool) {
 
 function skyTool(tool) {
   return ['rain', 'rainDrop', 'sun', 'sunlight', 'cloud', 'star', 'moon', 'moonbeam', 'firefly', 'constellationLine', 'rainbow'].includes(tool);
+}
+
+function createRecognitionFeedback(recognition, toolMeta, sceneState, recentTools) {
+  const base = toolMeta.feedbackText || createFeedback(recognition.toolId, sceneState, recentTools);
+  if (!recognition || recognition.reason === 'no-template') {
+    return `我先把这笔整理成${toolMeta.label}。${base}`;
+  }
+  if (recognition.lowConfidence) {
+    return `我从这笔里看见了一点${toolMeta.label}的样子，先把它整理成${toolMeta.label}。${base}`;
+  }
+  return `我看见它像${toolMeta.label}，已经整理成 QuickDraw 风格。${base}`;
 }
 
 function getLiveResponseY(tool, y, height) {
