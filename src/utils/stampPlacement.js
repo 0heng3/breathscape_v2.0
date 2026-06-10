@@ -1,6 +1,7 @@
 import { getQuickDrawAsset, getQuickDrawAssetVariant } from '../data/quickdrawAssets';
 import { getToolElement } from '../data/toolElementMap';
 import { clamp, clampPlacementToStage } from './coordinateUtils';
+import { refinePlacementFromStroke } from './strokeElementRefinement';
 
 export function buildStampPlacements(stroke, toolId, options = {}) {
   const tool = getToolElement(toolId);
@@ -9,7 +10,7 @@ export function buildStampPlacements(stroke, toolId, options = {}) {
     width: Number(options.canvasWidth) || stroke.canvasWidth || 720,
     height: Number(options.canvasHeight) || stroke.canvasHeight || 540,
   });
-  const basePlacements = computePlacementsAlongStroke(stroke, tool, stageRect);
+  const basePlacements = computePlacementsAlongStroke(stroke, { ...tool, id: toolId }, stageRect);
   const count = basePlacements.length;
   const placements = basePlacements.map((placement, index) => {
     const variantCount = Math.max(1, asset.assetVariants.length || 1);
@@ -83,7 +84,13 @@ export function computePlacementsAlongStroke(stroke, toolConfig, stageRectInput)
       zone,
       actualZone,
     });
-    return clampPlacementToStage(placement, stageRect);
+    return refinePlacementFromStroke(
+      clampPlacementToStage(placement, stageRect),
+      stroke,
+      toolConfig,
+      stageRect,
+      { index, count },
+    );
   });
   return resolvePlacementOverlaps(placements, stageRect);
 }

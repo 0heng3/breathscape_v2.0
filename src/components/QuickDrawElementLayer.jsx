@@ -31,6 +31,8 @@ function QuickDrawElementLayer({ items = [], sceneState = {} }) {
         const scaleY = layerSize && sourceHeight > 0 ? layerSize.height / sourceHeight : 1;
         const positionScale = Math.min(scaleX, scaleY);
         const size = (item.size || 72) * positionScale;
+        const width = (item.sizeX || item.size || 72) * positionScale;
+        const height = (item.sizeY || item.size || 72) * positionScale;
         const delay = item.live ? 0 : item.appearDelay || index * 36;
         const rotate = Number.isFinite(item.rotation) ? item.rotation : 0;
         const opacity = Number.isFinite(item.opacity) ? item.opacity : 1;
@@ -47,14 +49,16 @@ function QuickDrawElementLayer({ items = [], sceneState = {} }) {
             style={{
               left: `${x}px`,
               top: `${y}px`,
-              width: `${size}px`,
-              height: `${size}px`,
+              width: `${width}px`,
+              height: `${height}px`,
               opacity,
               transform: `translate(-50%, -50%) rotate(${rotate}deg) scale(${item.scale || 1})`,
               animationDelay: `${delay}ms`,
               '--element-delay': `${delay}ms`,
               '--element-tone': tone,
               '--element-size': `${size}px`,
+              '--element-width': `${width}px`,
+              '--element-height': `${height}px`,
             }}
           >
             <AnimatedQuickDrawGlyph
@@ -62,6 +66,8 @@ function QuickDrawElementLayer({ items = [], sceneState = {} }) {
               assetPath={item.assetPath}
               variantIndex={item.assetVariantIndex || item.variantIndex || 0}
               size={size}
+              width={width}
+              height={height}
               tone={tone}
               animated
               delay={delay}

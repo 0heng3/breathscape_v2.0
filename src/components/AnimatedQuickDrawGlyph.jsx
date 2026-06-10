@@ -9,6 +9,8 @@ function AnimatedQuickDrawGlyph({
   assetPath,
   variantIndex = 0,
   size = 72,
+  width,
+  height,
   tone = 'currentColor',
   color,
   className = '',
@@ -31,8 +33,8 @@ function AnimatedQuickDrawGlyph({
     <svg
       className={`animated-quickdraw-glyph ${className}`.trim()}
       viewBox={resolvedAssetPath ? externalAsset.viewBox : variant.viewBox || '0 0 256 256'}
-      width={size}
-      height={size}
+      width={width || size}
+      height={height || size}
       role={label ? 'img' : 'presentation'}
       aria-label={label}
       aria-hidden={label ? undefined : true}
