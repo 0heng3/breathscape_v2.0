@@ -1,5 +1,5 @@
 import { ArrowLeft, BookOpen, Volume2, VolumeX } from 'lucide-react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { getGardenDay } from './data/gardenDays';
 import { getMood } from './data/moods';
 import { getTool } from './data/tools';
@@ -10,13 +10,12 @@ import DiaryPage from './routes/DiaryPage';
 import GuidePage from './routes/GuidePage';
 import MoodPage from './routes/MoodPage';
 import StartPage from './routes/StartPage';
-import { prepareAudio, playElementTone, playLiveElementTone } from './utils/audioEngine';
-import { applyGestureSettling, clamp, createFeedback, createInitialSceneState, updateSceneState } from './utils/sceneState';
+import { prepareAudio, playElementTone } from './utils/audioEngine';
+import { applyGestureSettling, createFeedback, createInitialSceneState, updateSceneState } from './utils/sceneState';
 import { loadDiaries, saveDiaries } from './utils/storage';
 import { analyzeStroke, isValidStroke } from './utils/strokeAnalysis';
 import { createStory } from './utils/storyGenerator';
 import { getToolElement } from './data/toolElementMap';
-import { getQuickDrawAssetVariant } from './data/quickdrawAssets';
 import { buildStampPlacements } from './utils/stampPlacement';
 import { recognizeSketchTool } from './utils/sketchRecognizer';
 
@@ -37,17 +36,15 @@ function App() {
   const [elementHistory, setElementHistory] = useState([]);
   const [liveResponses, setLiveResponses] = useState([]);
   const [sceneState, setSceneState] = useState(() => createInitialSceneState(null, 1));
-  const [feedback, setFeedback] = useState('先选一个元素，再把它画出来。');
+  const [feedback, setFeedback] = useState('直接在画布上自由画，系统会识别并整理成 QuickDraw 风格。');
   const [diaries, setDiaries] = useState(loadDiaries);
   const [viewingDiaryId, setViewingDiaryId] = useState(null);
   const [title, setTitle] = useState('今天的小花园');
   const [muted, setMuted] = useState(false);
-  const liveResponseLastAt = useRef(0);
 
   const mood = getMood(selectedScene);
   const gardenDay = getGardenDay(selectedDay);
   const activeTool = getTool(selectedTool);
-  const activeToolMeta = getToolElement(selectedTool);
   const viewingDiary = viewingDiaryId ? diaries.find((entry) => entry.id === viewingDiaryId) : null;
   const elements = sceneState.toolCounts;
   const story = useMemo(() => createStory(mood, elementHistory, sceneState, gardenDay), [mood, elementHistory, sceneState, gardenDay]);
@@ -78,7 +75,7 @@ function App() {
     setElementHistory([]);
     setLiveResponses([]);
     setSceneState(createInitialSceneState(null, day));
-    setFeedback(`${nextDay.name}已经准备好了。`);
+    setFeedback(`${nextDay.name}已经准备好了。直接画你想到的小元素，我会先识别再整理。`);
     setTitle(`${nextDay.name}日记`);
   }
 
@@ -125,7 +122,7 @@ function App() {
       return;
     }
 
-    const recognition = recognizeSketchTool(analyzed, gardenDay.tools, { fallbackToolId: selectedTool || analyzed.tool });
+    const recognition = recognizeSketchTool(analyzed, gardenDay.tools);
     const toolId = recognition.toolId;
     const toolMeta = getToolElement(toolId);
     const recentTools = elementHistory.map((item) => item.tool);
@@ -178,115 +175,14 @@ function App() {
 
   function handleStrokeMove(event) {
     if (event.phase === 'end') return;
-    const liveRecognition = event.phase === 'move' && event.points?.length >= 8
-      ? recognizeSketchTool(event, gardenDay.tools, { fallbackToolId: selectedTool || event.tool })
-      : null;
-    const liveToolId = liveRecognition?.toolId || event.tool;
-    playLiveElementTone(liveToolId, { ...event, tool: liveToolId }, muted);
-
-    if (event.phase !== 'move' || event.distance < 5) return;
-    if (event.point.t - liveResponseLastAt.current < 55) return;
-    liveResponseLastAt.current = event.point.t;
-    const recognizedEvent = { ...event, tool: liveToolId, recognition: liveRecognition };
-    if (['wind', 'windLine', 'softWind', 'ribbon'].includes(liveToolId)) {
-      updateLiveWind(recognizedEvent);
-    }
-    updateLiveSceneEffects(recognizedEvent);
-    const id = `${event.id}-${Math.round(event.point.t)}`;
-    const liveY = getLiveResponseY(liveToolId, event.point.y, event.canvasHeight);
-    const liveVariantIndex = getLiveVariantIndex({ ...event, tool: liveToolId });
-    const liveVariant = getQuickDrawAssetVariant(liveToolId, liveVariantIndex);
-    const live = {
-      id,
-      tool: liveToolId,
-      x: event.point.x,
-      y: liveY,
-      speed: event.speed,
-      density: Math.min(1, event.distance / 26),
-      direction: Math.abs(event.point.y - event.previous.y) > Math.abs(event.point.x - event.previous.x) ? 'vertical' : 'horizontal',
-      canvasWidth: event.canvasWidth,
-      canvasHeight: event.canvasHeight,
-      stageWidth: event.stageRect?.width || event.canvasWidth,
-      stageHeight: event.stageRect?.height || event.canvasHeight,
-      live: true,
-      appearDelay: 0,
-      zone: skyTool(liveToolId) ? 'sky' : groundTool(liveToolId) ? 'ground' : 'any',
-      size: getLiveResponseSize(liveToolId),
-      opacity: 0.82,
-      animationType: 'draw',
-      assetVariantIndex: liveVariantIndex,
-      variantIndex: liveVariantIndex,
-      assetPath: liveVariant?.assetPath,
-      recognition: liveRecognition,
-    };
-    if (!live.assetPath) return;
-    setLiveResponses((current) => [...current.slice(-14), live]);
-    window.setTimeout(() => {
-      setLiveResponses((current) => current.filter((item) => item.id !== id));
-    }, 1100);
+    // During drawing, only the temporary black stroke is shown by DrawingCanvas.
+    // Recognition and QuickDraw element generation happen on pointer up.
   }
 
   function selectTool(toolId) {
     const toolMeta = getToolElement(toolId);
     setSelectedTool(toolId);
-    setFeedback(toolMeta.feedbackText || `现在画出来的都会变成${toolMeta.label || '这个元素'}。`);
-  }
-
-  function updateLiveWind(event) {
-    const dx = event.point.x - event.previous.x;
-    const dy = event.point.y - event.previous.y;
-    const length = Math.hypot(dx, dy);
-    if (length < 1) return;
-    const dirX = dx / length;
-    const dirY = dy / length;
-    const speed = clamp(event.speed || 0, 0, 1);
-    setSceneState((current) => {
-      const windEnergy = clamp((current.windEnergy || 0) + 0.004 + speed * 0.012, 0, 1);
-      const currentDir = current.windDirectionX || 1;
-      const targetDir = Math.abs(dirX) < 0.12 ? currentDir : clamp(dirX, -1, 1);
-      const smoothedDir = clamp(currentDir * 0.82 + targetDir * 0.18, -1, 1);
-      const smoothedSpeed = clamp((current.windSwaySpeed || 0) * 0.72 + speed * 0.28, 0, 1);
-      const targetStrength = clamp(0.24 + speed * 0.46 + windEnergy * 0.22, 0, 0.92);
-      return {
-        ...current,
-        windEnergy,
-        windDirectionX: Math.abs(smoothedDir) < 0.1 ? (smoothedDir >= 0 ? 0.1 : -0.1) : smoothedDir,
-        windDirectionY: clamp(dirY, -1, 1),
-        windSwaySpeed: smoothedSpeed,
-        windSwayStrength: clamp((current.windSwayStrength || 0) * 0.68 + targetStrength * 0.32, 0, 0.92),
-        animationSpeed: clamp(0.82 + smoothedSpeed * 0.38, 0.72, 1.22),
-        lastTool: event.tool,
-      };
-    });
-  }
-
-  function updateLiveSceneEffects(event) {
-    const tool = event.tool;
-    const speed = clamp(event.speed || 0, 0, 1);
-    setSceneState((current) => {
-      const next = { ...current, toolCounts: { ...current.toolCounts }, lastTool: tool };
-      if (['rain', 'rainDrop', 'dew'].includes(tool)) {
-        next.rainDensity = clamp((next.rainDensity || 0) + 0.006 + speed * 0.006, 0, 1);
-        next.soilWetness = clamp((next.soilWetness || 0) + 0.004, 0, 1);
-        next.waterRipple = clamp((next.waterRipple || 0) + 0.003, 0, 1);
-      } else if (['grass', 'reed', 'moss', 'sprout', 'smallTree', 'seed', 'memorySeed'].includes(tool)) {
-        next.grassCoverage = clamp((next.grassCoverage || 0) + 0.004 + speed * 0.003, 0, 1);
-        next.groundGreen = clamp((next.groundGreen || 0) + 0.004, 0, 1);
-      } else if (['flower', 'firstFlower', 'bud', 'quietFlower', 'mushroom'].includes(tool)) {
-        next.flowerBloom = clamp((next.flowerBloom || 0) + 0.004 + speed * 0.003, 0, 1);
-      } else if (['sun', 'sunlight', 'lantern', 'firefly', 'moon', 'windowLight', 'breathLight', 'star', 'moonbeam'].includes(tool)) {
-        next.brightness = clamp((next.brightness || 0) + 0.003 + speed * 0.002, 0.65, 0.96);
-        next.sunlightWarmth = clamp((next.sunlightWarmth || 0) + 0.004, 0, 1);
-        next.nightSparkle = clamp((next.nightSparkle || 0) + (['star', 'firefly'].includes(tool) ? 0.004 : 0.001), 0, 1);
-      } else if (['waterLine', 'ripple', 'puddle', 'leafBoat', 'snailTrail'].includes(tool)) {
-        next.waterFlow = clamp((next.waterFlow || 0) + 0.005 + speed * 0.004, 0, 1);
-        next.waterRipple = clamp((next.waterRipple || 0) + 0.004, 0, 1);
-      } else if (['bridge', 'stone', 'signpost', 'soilLine', 'shadow'].includes(tool)) {
-        next.pathCompletion = clamp((next.pathCompletion || 0) + 0.004, 0, 1);
-        if (tool === 'soilLine' || tool === 'shadow') next.soilTexture = clamp((next.soilTexture || 0) + 0.004, 0, 1);
-      }
-      return next;
-    });
+    setFeedback(`${toolMeta.label || '这个元素'}已作为识别参考。你仍然可以自由画，系统会根据笔迹识别结果生成元素。`);
   }
 
   function enterBreath() {
@@ -449,16 +345,8 @@ function App() {
   );
 }
 
-function groundTool(tool) {
-  return ['grass', 'flower', 'seed', 'memorySeed', 'moss', 'stone', 'mushroom', 'sprout', 'bud', 'firstFlower', 'reed', 'quietFlower', 'bridge', 'soilLine', 'signpost', 'smallTree'].includes(tool);
-}
-
-function skyTool(tool) {
-  return ['rain', 'rainDrop', 'sun', 'sunlight', 'cloud', 'star', 'moon', 'moonbeam', 'firefly', 'constellationLine', 'rainbow'].includes(tool);
-}
-
 function createRecognitionFeedback(recognition, toolMeta, sceneState, recentTools) {
-  const base = toolMeta.feedbackText || createFeedback(recognition.toolId, sceneState, recentTools);
+  const base = getRecognitionSceneEffect(recognition.toolId) || createFeedback(recognition.toolId, sceneState, recentTools);
   if (!recognition || recognition.reason === 'no-template') {
     return `我先把这笔整理成${toolMeta.label}。${base}`;
   }
@@ -468,25 +356,52 @@ function createRecognitionFeedback(recognition, toolMeta, sceneState, recentTool
   return `我看见它像${toolMeta.label}，已经整理成 QuickDraw 风格。${base}`;
 }
 
-function getLiveResponseY(tool, y, height) {
-  return clamp(y, 0, height);
-}
-
-function getLiveResponseSize(tool) {
-  if (['rain', 'rainDrop'].includes(tool)) return 52;
-  if (['star', 'firefly'].includes(tool)) return 44;
-  if (['grass', 'seed', 'memorySeed', 'dew'].includes(tool)) return 48;
-  return 58;
-}
-
-function getLiveVariantIndex(event) {
-  const value = `${event.tool}:${event.id}:${Math.round(event.point.t / 90)}:${Math.round(event.point.x)}:${Math.round(event.point.y)}`;
-  let hash = 2166136261;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
+function getRecognitionSceneEffect(toolId) {
+  const effects = {
+    seed: '土地里多了一个小小的种子点。',
+    memorySeed: '记忆小点留在了温室里。',
+    grass: '地面长出了一小片绿色。',
+    sunlight: '花园亮了一点，雾变薄了一点。',
+    sun: '花园亮了一点，雾变薄了一点。',
+    dew: '雨水落下来，土地喝到了一点水。',
+    rain: '雨落下来，土地和水面都有了变化。',
+    rainDrop: '雨滴落下来，土地和水面都有了变化。',
+    soilLine: '地面多了一些柔和的土壤纹理。',
+    flower: '花轻轻打开了一点。',
+    firstFlower: '花轻轻打开了一点。',
+    bud: '花苞轻轻打开了一点。',
+    quietFlower: '夜色里的花轻轻亮了一点。',
+    cloud: '天空里多了一朵慢慢移动的云。',
+    windLine: '风线带动草和云轻轻动起来。',
+    softWind: '轻风带动花园慢慢动起来。',
+    windBell: '风铃线轻轻晃了一下。',
+    ribbon: '彩带在空中轻轻飘起来。',
+    waterLine: '水面多了一道流动的线。',
+    ripple: '水面轻轻散开了一圈。',
+    puddle: '地面多了一点柔和反光。',
+    star: '星空里多了一点闪光。',
+    firefly: '夜色里多了一点萤火。',
+    moon: '夜色变得更安静。',
+    moonbeam: '月光让雾变轻了一点。',
+    lantern: '局部暖光扩大了一点。',
+    breathLight: '小角落暖了一点。',
+    windowLight: '远处亮了一点。',
+    mushroom: '地面冒出了一朵蘑菇。',
+    bridge: '小桥和路径更连贯了。',
+    stone: '石径更清楚了一点。',
+    moss: '石头旁边柔软了一点。',
+    smallTree: '角落里多了一点稳定的绿色。',
+    signpost: '小路方向更清楚了一点。',
+    shadow: '角落安静了一点。',
+    rainbow: '天空多了一道柔和的彩虹。',
+    constellationLine: '星光被轻轻连起来。',
+    leafBoat: '叶船沿着水走了一小段。',
+    floatingLeaf: '叶子被风轻轻带走。',
+    snailTrail: '蜗牛线慢慢留下来。',
+    sprout: '土里冒出了一点新意。',
+    reed: '岸边长高了一点。',
+  };
+  return effects[toolId] || '';
 }
 
 export default App;

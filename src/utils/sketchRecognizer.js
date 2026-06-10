@@ -5,11 +5,11 @@ import { matchQuickDrawCategories } from './quickdrawTemplateMatcher';
 const lowConfidenceThreshold = 0.18;
 
 export function recognizeSketchTool(stroke, candidateToolIds = [], options = {}) {
-  const candidates = normalizeCandidates(candidateToolIds, options.fallbackToolId);
+  const candidates = normalizeCandidates(candidateToolIds);
   const categories = getCandidateCategories(candidates);
   const categoryMatches = matchQuickDrawCategories(stroke, categories);
   if (!categoryMatches.length) {
-    return fallbackRecognition(options.fallbackToolId || candidates[0] || stroke.tool || 'seed', 'no-template');
+    return fallbackRecognition(candidates[0] || 'seed', 'no-template');
   }
 
   const toolMatches = candidates
@@ -43,7 +43,7 @@ export function recognizeSketchTool(stroke, candidateToolIds = [], options = {})
     .sort((a, b) => a.score - b.score);
 
   if (!toolMatches.length) {
-    return fallbackRecognition(options.fallbackToolId || candidates[0] || stroke.tool || 'seed', 'no-candidate-match');
+    return fallbackRecognition(candidates[0] || 'seed', 'no-candidate-match');
   }
 
   const best = toolMatches[0];
@@ -64,10 +64,9 @@ export function recognizeSketchTool(stroke, candidateToolIds = [], options = {})
   };
 }
 
-function normalizeCandidates(candidateToolIds, fallbackToolId) {
+function normalizeCandidates(candidateToolIds) {
   const list = Array.isArray(candidateToolIds) ? candidateToolIds.filter(Boolean) : [];
-  const withFallback = fallbackToolId && !list.includes(fallbackToolId) ? [...list, fallbackToolId] : list;
-  return [...new Set(withFallback.length ? withFallback : ['seed', 'grass', 'firstFlower', 'cloud', 'rainDrop', 'star'])];
+  return [...new Set(list.length ? list : ['seed', 'grass', 'firstFlower', 'cloud', 'rainDrop', 'star'])];
 }
 
 function getCandidateCategories(candidateToolIds) {

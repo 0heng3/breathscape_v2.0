@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import { getQuickDrawInkColor } from '../utils/quickdrawStyle';
 import { getLocalStageRect, getStagePoint } from '../utils/coordinateUtils';
 
 function DrawingCanvas({ activeTool, onStroke, onStrokeMove }) {
@@ -66,7 +65,7 @@ function DrawingCanvas({ activeTool, onStroke, onStrokeMove }) {
     drawing.current = {
       id: crypto.randomUUID(),
       tool: activeTool.id,
-      color: getQuickDrawInkColor(activeTool.id),
+      color: '#111111',
       points: [point],
       started: point.t,
       length: 0,
@@ -99,14 +98,10 @@ function DrawingCanvas({ activeTool, onStroke, onStrokeMove }) {
 
     const ctx = canvasRef.current.getContext('2d');
     redrawTraces(canvasRef.current, traces.current, point.t);
-    ctx.strokeStyle = drawing.current.color;
-    ctx.lineWidth = ['rain', 'dew', 'waterLine', 'ripple', 'puddle', 'rainDrop'].includes(activeTool.id)
-      ? 2.2
-      : ['sun', 'sunlight', 'lantern', 'firefly', 'moon', 'star', 'breathLight', 'moonbeam'].includes(activeTool.id)
-        ? 2.4
-        : 2.6;
-    ctx.globalAlpha = 0.05;
-    ctx.filter = 'blur(0.12px)';
+    ctx.strokeStyle = '#111111';
+    ctx.lineWidth = 2.6;
+    ctx.globalAlpha = 0.62;
+    ctx.filter = 'none';
     drawSmoothPath(ctx, drawing.current.points);
     ctx.stroke();
     ctx.filter = 'none';
@@ -214,12 +209,8 @@ function redrawTraces(canvas, items, now = performance.now()) {
   items.forEach((trace) => {
     const age = now - (trace.createdAt || now);
     const fade = clamp((1 - age / (trace.fadeDuration || 420)) * 0.08, 0.008, 0.06);
-    ctx.strokeStyle = trace.quickdrawColor || trace.color || getQuickDrawInkColor(trace.tool);
-    ctx.lineWidth = ['rain', 'dew', 'waterLine', 'ripple', 'puddle'].includes(trace.tool)
-      ? 2
-      : ['sun', 'sunlight', 'lantern', 'firefly', 'moon', 'star', 'breathLight', 'moonbeam'].includes(trace.tool)
-        ? 2.2
-        : 2.4;
+    ctx.strokeStyle = '#111111';
+    ctx.lineWidth = 2.4;
     ctx.globalAlpha = fade;
     drawSmoothPath(ctx, trace.points);
     ctx.stroke();

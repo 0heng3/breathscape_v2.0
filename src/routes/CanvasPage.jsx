@@ -40,7 +40,6 @@ function CanvasPage({
           feedback={feedback}
           sceneState={sceneState}
           activeTool={activeTool}
-          toolTip={toolMeta.feedbackText}
           canFinish={strokes.length > 0}
           onFinish={onFinish}
           onSuggest={onSuggest}
