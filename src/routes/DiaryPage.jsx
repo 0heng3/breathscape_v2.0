@@ -8,8 +8,8 @@ function DiaryPage({ diaries, onNewGarden, onOpenDiary }) {
   return (
     <section className="screen diary-page page-enter">
       <div className="section-heading">
-        <p className="eyebrow">回看作品</p>
-        <h2>我的情绪场景日记</h2>
+        <p className="eyebrow">作品回看</p>
+        <h2>我的花园日记</h2>
       </div>
       <div className="diary-layout">
         <aside className="week-map">

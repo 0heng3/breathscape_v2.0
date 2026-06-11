@@ -15,11 +15,11 @@ function StartPage({ mood, selectedDay = 1, onSelectDay, onStart, onOpenDiary })
       <div className="hero-copy story-cover">
         <p className="pill-label">息境 BreathScape</p>
         <h2>今天的小花园醒来了</h2>
-        <p>先选一个花园角落，再把线条放进自然里。</p>
+        <p>选一天，画几笔，让线条变成花园里的小变化。</p>
 
         <div className="garden-day-selector" aria-label="选择七日花园">
           <div className="garden-day-selector__label">
-            <span>今日花园角落</span>
+            <span>今日花园</span>
             <strong>{gardenDay.name}</strong>
           </div>
           <div className="garden-day-selector__buttons">
@@ -47,7 +47,7 @@ function StartPage({ mood, selectedDay = 1, onSelectDay, onStart, onOpenDiary })
         <div className="hero-actions">
           <SoftButton onClick={onStart}>
             <Play size={26} />
-            开始今天的花园
+            开始绘画
           </SoftButton>
           <SoftButton variant="quiet" onClick={onOpenDiary}>
             <BookOpen size={22} />

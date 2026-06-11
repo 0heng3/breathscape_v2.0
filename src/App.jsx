@@ -21,12 +21,39 @@ import { createMultiStrokeDrawing, DEFAULT_DRAWING_SETTLE_MS } from './utils/mul
 import { classifyWithQuickDrawModel, loadQuickDrawSketchModel } from './utils/quickdrawModelClassifier';
 import { mapQuickDrawCategoryToTool } from './data/quickdrawCategoryToolMap';
 import { classifyWithQuickDrawCnn, loadQuickDrawCnnModel } from './utils/quickdrawCnnClassifier';
+import { rasterizeQuickDrawDrawing, rasterToDataUrl } from './utils/quickdrawRasterizer';
 
 const routes = ['/start', '/mood-scene', '/guide', '/garden', '/breath', '/diary-card', '/diary-list'];
 
 function normalizeRoute(pathname) {
   const clean = pathname === '/' ? '/start' : pathname;
   return routes.includes(clean) ? clean : '/start';
+}
+
+function createRecognitionProcess(bundle = null) {
+  const ready = Boolean(bundle);
+  return {
+    phase: 'idle',
+    modelStatus: ready ? 'ready' : 'loading',
+    modelLine: ready ? 'QuickDraw CNN ready' : 'QuickDraw CNN loading',
+    imageSize: bundle?.metadata?.imageSize || bundle?.imageSize || 64,
+    accuracy: bundle?.metadata?.mappedToolAccuracy || bundle?.metadata?.bestValidationAccuracy || null,
+    strokeCount: 0,
+    pointCount: 0,
+    selectedToolId: null,
+    selectedToolLabel: null,
+    finalToolId: null,
+    finalToolLabel: null,
+    reason: null,
+    confidence: null,
+    topK: [],
+    allowedTools: [],
+    allowedLabels: [],
+    sceneAllowed: null,
+    fallbackLine: null,
+    crowded: false,
+    rasterPreviewUrl: null,
+  };
 }
 
 function App() {
@@ -39,8 +66,9 @@ function App() {
   const [elementHistory, setElementHistory] = useState([]);
   const [liveResponses, setLiveResponses] = useState([]);
   const [clearTraceSignal, setClearTraceSignal] = useState(0);
+  const [recognitionProcess, setRecognitionProcess] = useState(() => createRecognitionProcess());
   const [sceneState, setSceneState] = useState(() => createInitialSceneState(null, 1));
-  const [feedback, setFeedback] = useState('直接在画布上自由画；停笔后系统会识别，并整理成花园里的柔和图案。');
+  const [feedback, setFeedback] = useState('可以自由画。停笔后一起整理。');
   const [diaries, setDiaries] = useState(loadDiaries);
   const [viewingDiaryId, setViewingDiaryId] = useState(null);
   const [title, setTitle] = useState('今天的小花园');
@@ -86,11 +114,25 @@ function App() {
 
   useEffect(() => {
     let cancelled = false;
+    setRecognitionProcess((current) => ({
+      ...current,
+      modelStatus: 'loading',
+      modelLine: 'QuickDraw CNN loading',
+    }));
     loadQuickDrawSketchModel().then((model) => {
       if (!cancelled) quickdrawModelRef.current = model;
     });
     loadQuickDrawCnnModel().then((bundle) => {
-      if (!cancelled) quickdrawCnnRef.current = bundle;
+      if (!cancelled) {
+        quickdrawCnnRef.current = bundle;
+        setRecognitionProcess((current) => ({
+          ...current,
+          modelStatus: bundle ? 'ready' : 'fallback',
+          modelLine: bundle ? 'QuickDraw CNN ready' : 'QuickDraw CNN unavailable',
+          imageSize: bundle?.metadata?.imageSize || bundle?.imageSize || 64,
+          accuracy: bundle?.metadata?.mappedToolAccuracy || bundle?.metadata?.bestValidationAccuracy || null,
+        }));
+      }
     });
     return () => {
       cancelled = true;
@@ -114,11 +156,12 @@ function App() {
     setStrokes([]);
     setElementHistory([]);
     setLiveResponses([]);
+    setRecognitionProcess(createRecognitionProcess(quickdrawCnnRef.current));
     setClearTraceSignal((value) => value + 1);
     const initialState = createInitialSceneState(null, day);
     sceneStateRef.current = initialState;
     setSceneState(initialState);
-    setFeedback(`${nextDay.name}已经准备好了。先选一个元素，再在画布上画。`);
+    setFeedback(`${nextDay.name}准备好了。`);
     setTitle(`${nextDay.name}日记`);
   }
 
@@ -169,7 +212,22 @@ function App() {
     }
 
     pendingStrokeSessionRef.current = [...pendingStrokeSessionRef.current, analyzed];
-    setFeedback(`我会等你停笔后再识别整理。当前已经记住 ${pendingStrokeSessionRef.current.length} 笔。`);
+    setRecognitionProcess((current) => ({
+      ...current,
+      phase: 'collecting',
+      strokeCount: pendingStrokeSessionRef.current.length,
+      pointCount: pendingStrokeSessionRef.current.reduce((sum, stroke) => sum + (stroke.pointCount || stroke.points?.length || 0), 0),
+      selectedToolId: selectedToolRef.current,
+      selectedToolLabel: selectedToolRef.current ? getToolElement(selectedToolRef.current).label : null,
+      finalToolId: null,
+      finalToolLabel: null,
+      reason: null,
+      confidence: null,
+      topK: [],
+      fallbackLine: null,
+      crowded: false,
+    }));
+    setFeedback(`已记住 ${pendingStrokeSessionRef.current.length} 笔，停下来后整理。`);
     clearPendingDrawingTimer();
     settleTimerRef.current = window.setTimeout(() => {
       finalizePendingDrawing();
@@ -188,6 +246,20 @@ function App() {
     }
 
     const currentSelectedTool = selectedToolRef.current;
+    const rasterSize = quickdrawCnnRef.current?.metadata?.imageSize || quickdrawCnnRef.current?.imageSize || 64;
+    const rasterPreview = createRasterPreview(drawing, rasterSize);
+    setRecognitionProcess((current) => ({
+      ...current,
+      phase: 'classifying',
+      strokeCount: drawing.strokeCount,
+      pointCount: drawing.pointCount,
+      imageSize: rasterSize,
+      selectedToolId: currentSelectedTool,
+      selectedToolLabel: currentSelectedTool ? getToolElement(currentSelectedTool).label : null,
+      allowedTools: gardenDay.tools,
+      allowedLabels: gardenDay.tools.map((toolId) => getToolElement(toolId).label),
+      rasterPreviewUrl: rasterPreview,
+    }));
     const resolution = resolveDrawingTool(drawing, currentSelectedTool, gardenDay.tools, sceneStateRef.current, {
       cnnModel: quickdrawCnnRef.current,
       sketchModel: quickdrawModelRef.current,
@@ -244,6 +316,22 @@ function App() {
     setElementHistory((current) => [...current, ...generated]);
     setSceneState(nextState);
     setClearTraceSignal((value) => value + 1);
+    setLiveResponses((current) => current.filter((item) => performance.now() - (item.createdAt || 0) < 1800).slice(-10));
+    setRecognitionProcess((current) => ({
+      ...current,
+      phase: 'resolved',
+      finalToolId: toolId,
+      finalToolLabel: toolMeta.label,
+      reason: recognition.reason,
+      confidence: recognition.confidence,
+      topK: (recognition.alternatives || []).slice(0, 5),
+      sceneAllowed: gardenDay.tools.includes(toolId),
+      fallbackLine: recognition.reason === 'stroke-rule'
+        ? 'model top-k not allowed in this scene; stroke rules used'
+        : null,
+      crowded: tolerance.crowded,
+      rasterPreviewUrl: rasterPreview,
+    }));
     setFeedback(createRecognitionFeedback(recognition, toolMeta, nextState, recentTools, tolerance));
     playElementTone(toolId, drawing.speedAvg, muted);
   }
@@ -262,21 +350,54 @@ function App() {
 
   function handleStrokeMove(event) {
     if (event.phase === 'end') return;
-    // During drawing, only the temporary black stroke is shown by DrawingCanvas.
-    // DrawingCanvas owns the temporary black stroke; recognition waits for the drawing session to settle.
+    const selected = selectedToolRef.current;
+    if (!selected) {
+      setRecognitionProcess((current) => ({
+        ...current,
+        phase: current.phase === 'idle' ? 'drawing' : current.phase,
+        selectedToolId: null,
+        selectedToolLabel: null,
+      }));
+      return;
+    }
+    const toolMeta = getToolElement(selected);
+    setRecognitionProcess((current) => ({
+      ...current,
+      phase: current.phase === 'idle' ? 'drawing' : current.phase,
+      selectedToolId: selected,
+      selectedToolLabel: toolMeta.label,
+    }));
   }
 
   function selectTool(toolId) {
     if (!toolId) {
       setSelectedTool(null);
       selectedToolRef.current = null;
-      setFeedback('自由画打开了。我会按线条的速度、方向和密度轻轻回应。');
+      setRecognitionProcess((current) => ({
+        ...current,
+        phase: 'idle',
+        selectedToolId: null,
+        selectedToolLabel: null,
+        finalToolId: null,
+        finalToolLabel: null,
+        reason: null,
+      }));
+      setFeedback('自由画打开了。');
       return;
     }
     const toolMeta = getToolElement(toolId);
     selectedToolRef.current = toolId;
     setSelectedTool(toolId);
-    setFeedback(`${toolMeta.label || '这个元素'}已作为识别参考。你仍然可以自由画，系统会根据笔迹识别结果生成元素。`);
+    setRecognitionProcess((current) => ({
+      ...current,
+      phase: 'idle',
+      selectedToolId: toolId,
+      selectedToolLabel: toolMeta.label,
+      finalToolId: null,
+      finalToolLabel: null,
+      reason: null,
+    }));
+    setFeedback(`当前选择：${toolMeta.label || '这个元素'}。`);
   }
 
   function enterBreath() {
@@ -306,6 +427,7 @@ function App() {
     setStrokes(entry.strokes || []);
     setElementHistory(entry.elementHistory || []);
     setLiveResponses([]);
+    setRecognitionProcess(createRecognitionProcess(quickdrawCnnRef.current));
     const replayState = entry.sceneState || createInitialSceneState(entry.mood, day);
     sceneStateRef.current = replayState;
     setSceneState(replayState);
@@ -442,6 +564,7 @@ function App() {
             strokes={strokes}
             elementHistory={elementHistory}
             liveResponses={liveResponses}
+            recognitionProcess={recognitionProcess}
             clearTraceSignal={clearTraceSignal}
             onSelectTool={selectTool}
             onStroke={handleStroke}
@@ -569,6 +692,17 @@ function pickSceneAllowedPrediction(prediction, drawing, availableTools) {
     }
   }
   return null;
+}
+
+function createRasterPreview(drawing, size = 64) {
+  const raster = rasterizeQuickDrawDrawing(drawing, size, {
+    padding: size >= 64 ? 4 : 3,
+    brushRadius: size >= 64 ? 1.1 : 0.85,
+  });
+  return rasterToDataUrl(raster, size, {
+    background: '#fff8ea',
+    ink: [46, 43, 39],
+  });
 }
 
 function inferToolFromStrokeRules(drawing, availableTools, sceneState) {

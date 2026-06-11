@@ -5,7 +5,7 @@ import SoftButton from '../components/SoftButton';
 import { getTool } from '../data/tools';
 import { uniqueItems } from '../utils/storyGenerator';
 
-function DiaryCardPage({ mood, gardenDay, sceneState, elementHistory, strokes, story, title, onTitleChange, onSave }) {
+function DiaryCardPage({ mood, gardenDay, sceneState, elementHistory, story, title, onTitleChange, onSave }) {
   return (
     <section className="screen diary-card-page page-enter">
       <GardenStage mood={mood} gardenDay={gardenDay} sceneState={sceneState} elementHistory={elementHistory} calm diary />
@@ -13,7 +13,7 @@ function DiaryCardPage({ mood, gardenDay, sceneState, elementHistory, strokes, s
         <div className="lamp-dialogue">
           <span className="mini-lamp" aria-hidden="true" />
           <div>
-            <p className="eyebrow">小灯留下的日记</p>
+            <p className="eyebrow">今日花园卡</p>
             <p className="diary-date">{new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium' }).format(new Date())}</p>
           </div>
         </div>

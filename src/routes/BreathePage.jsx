@@ -10,7 +10,6 @@ function BreathePage({
   gardenDay,
   sceneState,
   elementHistory,
-  strokes,
   onGesture,
   onNext,
   isDiaryReplay = false,
@@ -25,10 +24,9 @@ function BreathePage({
       <article className="guide-card calm-card breathe-side-card">
         <div id="breath-camera-dock" className="breathe-camera-slot" />
         <div className="breathe-side-copy">
-          <p className="eyebrow">{isDiaryReplay ? '镜头回放' : '花园安放模式'}</p>
-          <h2>{isDiaryReplay ? `${replayTitle || '这张日记'}可以再动一动` : '花园会把今天的线条轻轻收好'}</h2>
-          <p>跟着小灯吸气，再慢慢呼气。</p>
-          <p>打开摄像头后，跟着动作卡做双手靠近、慢慢抬手、单手带风或安静站住，花园会跟着你的姿势变化。</p>
+          <p className="eyebrow">{isDiaryReplay ? '日记回放' : '安放模式'}</p>
+          <h2>{isDiaryReplay ? `${replayTitle || '这张日记'}可以再动一动` : '花园把今天的图案收好'}</h2>
+          <p>跟着小灯慢慢呼吸。打开摄像头后，动作会让画布里的图案轻轻变化。</p>
           <div className="calm-progress" aria-label="三次呼吸">
             <span />
             <span />

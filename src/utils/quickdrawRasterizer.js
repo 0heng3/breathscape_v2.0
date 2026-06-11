@@ -37,6 +37,32 @@ export function rasterizeQuickDrawDrawing(drawing, size = 32, options = {}) {
   return grid;
 }
 
+export function rasterToDataUrl(raster, size = 64, options = {}) {
+  if (!raster || typeof document === 'undefined') return null;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  const background = options.background || '#fff8ea';
+  const ink = options.ink || [45, 43, 39];
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, size, size);
+  const imageData = ctx.getImageData(0, 0, size, size);
+  for (let index = 0; index < raster.length; index += 1) {
+    const value = Math.max(0, Math.min(1, Number(raster[index]) || 0));
+    const offset = index * 4;
+    const shade = 1 - value;
+    imageData.data[offset] = Math.round(ink[0] * value + 255 * shade);
+    imageData.data[offset + 1] = Math.round(ink[1] * value + 248 * shade);
+    imageData.data[offset + 2] = Math.round(ink[2] * value + 234 * shade);
+    imageData.data[offset + 3] = 255;
+  }
+  ctx.putImageData(imageData, 0, 0);
+  return canvas.toDataURL('image/png');
+}
+
 function normalizePoint(point, bounds, scale, offsetX, offsetY) {
   return {
     x: (point.x - bounds.minX) * scale + offsetX,

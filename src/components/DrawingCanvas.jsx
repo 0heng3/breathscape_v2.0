@@ -1,12 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import { getLocalStageRect, getStagePoint } from '../utils/coordinateUtils';
 
-function DrawingCanvas({ activeTool, onStroke, onStrokeMove, clearTraceSignal = 0 }) {
+function DrawingCanvas({ activeTool, activeLabel, onStroke, onStrokeMove, clearTraceSignal = 0 }) {
   const canvasRef = useRef(null);
   const drawing = useRef(null);
   const traces = useRef([]);
   const canvasSize = useRef({ width: 0, height: 0 });
   const rafRef = useRef(0);
+  const redrawRafRef = useRef(0);
 
   useEffect(() => {
     traces.current = [];
@@ -25,33 +26,30 @@ function DrawingCanvas({ activeTool, onStroke, onStrokeMove, clearTraceSignal = 
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      redrawTraces(canvas, traces.current, performance.now());
+      scheduleRedraw();
     };
     resize();
     window.addEventListener('resize', resize);
     return () => window.removeEventListener('resize', resize);
   }, []);
 
-  useEffect(() => {
-    function tick(now) {
+  useEffect(() => () => {
+    if (redrawRafRef.current) window.cancelAnimationFrame(redrawRafRef.current);
+    redrawRafRef.current = 0;
+  }, []);
+
+  function scheduleRedraw() {
+    if (redrawRafRef.current) return;
+    redrawRafRef.current = window.requestAnimationFrame((now) => {
+      redrawRafRef.current = 0;
       redrawTraces(canvasRef.current, traces.current, now, drawing.current);
-      traces.current = traces.current.filter((trace) => trace.holdUntilRecognition || now - trace.createdAt < trace.fadeDuration);
-      if (traces.current.length || drawing.current) {
-        rafRef.current = window.requestAnimationFrame(tick);
-      } else {
-        rafRef.current = 0;
-      }
-    }
+    });
+  }
 
-    if ((traces.current.length || drawing.current) && !rafRef.current) {
-      rafRef.current = window.requestAnimationFrame(tick);
-    }
-
-    return () => {
-      if (rafRef.current) window.cancelAnimationFrame(rafRef.current);
-      rafRef.current = 0;
-    };
-  });
+  useEffect(() => () => {
+    if (rafRef.current) window.cancelAnimationFrame(rafRef.current);
+    rafRef.current = 0;
+  }, []);
 
   function getPoint(event) {
     const stageEl = canvasRef.current.closest('.garden-stage') || canvasRef.current;
@@ -66,7 +64,6 @@ function DrawingCanvas({ activeTool, onStroke, onStrokeMove, clearTraceSignal = 
       // Some synthetic or interrupted pointer streams cannot be captured.
     }
     const point = getPoint(event);
-    redrawTraces(canvasRef.current, traces.current, point.t, drawing.current);
     drawing.current = {
       id: crypto.randomUUID(),
       tool: activeTool.id,
@@ -75,12 +72,13 @@ function DrawingCanvas({ activeTool, onStroke, onStrokeMove, clearTraceSignal = 
       started: point.t,
       length: 0,
     };
+    scheduleRedraw();
     onStrokeMove?.({
       id: drawing.current.id,
       phase: 'start',
       tool: activeTool.id,
       point,
-      points: drawing.current.points.slice(),
+      pointCount: drawing.current.points.length,
       previous: point,
       speed: 0,
       distance: 0,
@@ -102,13 +100,13 @@ function DrawingCanvas({ activeTool, onStroke, onStrokeMove, clearTraceSignal = 
     drawing.current.length += distance;
     drawing.current.points.push(point);
 
-    redrawTraces(canvasRef.current, traces.current, point.t, drawing.current);
+    scheduleRedraw();
     onStrokeMove?.({
       id: drawing.current.id,
       phase: 'move',
       tool: activeTool.id,
       point,
-      points: drawing.current.points.slice(),
+      pointCount: drawing.current.points.length,
       previous,
       speed,
       distance,
@@ -191,7 +189,7 @@ function DrawingCanvas({ activeTool, onStroke, onStrokeMove, clearTraceSignal = 
       onPointerUp={end}
       onPointerCancel={end}
       onPointerLeave={end}
-      aria-label={`当前笔刷：${activeTool.name}`}
+      aria-label={`当前绘画：${activeLabel || activeTool?.label || activeTool?.name || '自由画'}`}
     />
   );
 }

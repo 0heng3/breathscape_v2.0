@@ -20,7 +20,8 @@ export function loadQuickDrawCnnModel(basePath = '/quickdraw-cnn') {
 export function classifyWithQuickDrawCnn(drawing, bundle) {
   if (!bundle?.layers || !bundle?.metadata?.labels?.length) return null;
   const size = bundle.metadata.imageSize || bundle.imageSize || 32;
-  const raster = rasterizeQuickDrawDrawing(drawing, size);
+  const rasterOptions = getRasterOptions(bundle, size);
+  const raster = rasterizeQuickDrawDrawing(drawing, size, rasterOptions);
   if (!raster) return null;
 
   const logits = runCnn(raster, bundle);
@@ -38,6 +39,13 @@ export function classifyWithQuickDrawCnn(drawing, bundle) {
     alternatives: ranked.slice(0, 5),
     modelType: bundle.metadata.type || 'quickdraw-cnn',
   };
+}
+
+function getRasterOptions(bundle, size) {
+  if (bundle.metadata?.rasterOptions) return bundle.metadata.rasterOptions;
+  return size >= 64
+    ? { padding: 4, brushRadius: 1.1 }
+    : { padding: 3, brushRadius: 0.85 };
 }
 
 function prepareModel(model, metadata) {

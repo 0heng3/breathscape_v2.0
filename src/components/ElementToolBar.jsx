@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { getToolElement, toolIds } from '../data/toolElementMap';
+import ElementSvgIcon from './ElementSvgIcon';
 
 function ElementToolBar({ activeToolId, onSelectTool, toolOrder = toolIds }) {
   const [expanded, setExpanded] = useState(false);
@@ -12,7 +13,7 @@ function ElementToolBar({ activeToolId, onSelectTool, toolOrder = toolIds }) {
         className={`tool-button element-tool-button element-tool-button--free ${activeToolId ? '' : 'active'}`}
         onClick={() => onSelectTool(null)}
         style={{ '--tool-color': '#8f7ca7', color: '#8f7ca7' }}
-        title="不选择固定元素，按笔触方向轻轻回应。"
+        title="不选择固定元素，按笔触特征回应。"
         type="button"
       >
         <span className="element-tool-button__glyph" aria-hidden="true">
@@ -24,7 +25,7 @@ function ElementToolBar({ activeToolId, onSelectTool, toolOrder = toolIds }) {
         </span>
         <span className="element-tool-button__label">自由画</span>
       </button>
-      {visibleToolIds.map((toolId, index) => {
+      {visibleToolIds.map((toolId) => {
         const tool = getToolElement(toolId);
         const active = activeToolId === toolId;
 
@@ -38,14 +39,7 @@ function ElementToolBar({ activeToolId, onSelectTool, toolOrder = toolIds }) {
             type="button"
           >
             <span className="element-tool-button__glyph" aria-hidden="true">
-              <span className={`tool-button__glyph-art tool-entry tool-entry-${toolId}`}>
-                <span />
-                <span />
-                <span />
-                <span />
-                <span />
-                <span />
-              </span>
+              <ElementSvgIcon toolId={toolId} size={36} />
             </span>
             <span className="element-tool-button__label">{tool.label}</span>
           </button>

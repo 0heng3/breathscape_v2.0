@@ -3,6 +3,7 @@ import React from 'react';
 import GardenStage from '../components/GardenStage';
 import SoftButton from '../components/SoftButton';
 import { getTool } from '../data/tools';
+import ElementSvgIcon from '../components/ElementSvgIcon';
 
 function GuidePage({ mood, gardenDay, sceneState, entryTool, onChooseTool, onFreeChoose }) {
   const tools = entryTool
@@ -16,7 +17,7 @@ function GuidePage({ mood, gardenDay, sceneState, entryTool, onChooseTool, onFre
         <div className="lamp-dialogue">
           <span className="mini-lamp" aria-hidden="true" />
           <div>
-            <p className="eyebrow">今天的角落</p>
+            <p className="eyebrow">准备画画</p>
             <h2>{gardenDay.name}</h2>
           </div>
         </div>
@@ -30,29 +31,19 @@ function GuidePage({ mood, gardenDay, sceneState, entryTool, onChooseTool, onFre
             <span />
           </span>
           <div>
-            <p className="guide-scene-token__label">今日小场景</p>
+            <p className="guide-scene-token__label">今天的入口</p>
             <strong>{mood.title}</strong>
           </div>
         </div>
-        <p>{gardenDay.subtitle}</p>
-        {(mood.guideText || []).slice(0, 2).map((line) => (
-          <p key={line}>{line}</p>
-        ))}
-        <p className="gift-title">可以先试试</p>
+        <p className="guide-main-copy">可以先选一个元素，也可以直接自由画。停笔后，花园会把多笔线条一起整理。</p>
+        <p className="gift-title">推荐试试</p>
         <div className="recommended-tools">
           {tools.map((toolId) => {
             const tool = getTool(toolId);
             return (
               <button key={toolId} onClick={() => onChooseTool(toolId)} style={{ '--tool-color': tool.color, color: tool.color }}>
                 <span className="guide-tool-entry" aria-hidden="true">
-                  <span className={`tool-button__glyph-art tool-entry tool-entry-${toolId}`}>
-                    <span />
-                    <span />
-                    <span />
-                    <span />
-                    <span />
-                    <span />
-                  </span>
+                  <ElementSvgIcon toolId={toolId} size={28} />
                 </span>
                 {tool.label}
               </button>
@@ -61,7 +52,7 @@ function GuidePage({ mood, gardenDay, sceneState, entryTool, onChooseTool, onFre
         </div>
         <SoftButton variant="secondary" onClick={onFreeChoose}>
           <Sprout size={22} />
-          进入花园
+          直接进入花园
         </SoftButton>
       </article>
     </section>
