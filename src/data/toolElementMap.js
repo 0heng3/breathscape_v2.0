@@ -351,10 +351,16 @@ Object.assign(toolElementMap, {
     allowedZones: commonPlacement.ground,
     fallbackIfWrongZone: 'ground',
   }),
-  snailTrail: aliasTool('snailTrail', 'snail', {
+  snailTrail: aliasTool('snailTrail', 'mushroom', {
     categories: ['snail', 'circle', 'squiggle'],
     label: '蜗牛',
+    placementRule: 'groundSprout',
+    maxCountPerStroke: 3,
+    stateEffect: { pathCompletion: 0.04, calmLevel: 0.08, soilWetness: 0.02 },
+    soundEffect: 'soil',
     feedbackText: '现在画出来的都会变成蜗牛，会慢慢爬出来。',
+    allowedZones: commonPlacement.ground,
+    fallbackIfWrongZone: 'ground',
   }),
   signpost: aliasTool('signpost', 'bridge', {
     label: '路牌',
