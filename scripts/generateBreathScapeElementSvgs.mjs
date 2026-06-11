@@ -68,7 +68,7 @@ const generatorByTool = {
   moonbeam: moonbeamPaths,
   dew: dewPaths,
   rain: rainPaths,
-  rainDrop: rainDropPaths,
+  rainDrop: rainPaths,
   soilLine: soilLinePaths,
   shadow: shadowPaths,
   flower: flowerPaths,
@@ -85,7 +85,7 @@ const generatorByTool = {
   waterLine: waterLinePaths,
   ripple: ripplePaths,
   puddle: puddlePaths,
-  snail: snailPaths,
+  snail: snailTrailPaths,
   snailTrail: snailTrailPaths,
   leafBoat: leafBoatPaths,
   bridge: bridgePaths,
@@ -119,7 +119,7 @@ for (const toolId of toolIds) {
   meta.tools[toolId] = [];
   for (let variant = 1; variant <= VARIANT_COUNT; variant += 1) {
     const fileName = `${toolId}_${String(variant).padStart(3, '0')}.svg`;
-    const svg = serializeSvg(generator(variant), getStrokeWidth(toolId), toolId);
+    const svg = serializeSvg(generator(variant), getStrokeWidth(toolId));
     await writeFile(resolve(toolDir, fileName), svg, 'utf8');
     meta.tools[toolId].push(`/breathscape-svg-assets/${toolId}/${fileName}`);
   }
@@ -139,21 +139,12 @@ async function resetOutputDir() {
   await mkdir(safeOutDir, { recursive: true });
 }
 
-function serializeSvg(paths, strokeWidth, toolId) {
+function serializeSvg(paths, strokeWidth) {
   const body = paths
     .filter(Boolean)
-    .map((path, index) => {
-      const d = typeof path === 'string' ? path : path.d;
-      const stroke = typeof path === 'string' ? getPathStroke(toolId, index) : path.stroke || getPathStroke(toolId, index);
-      return `  <path d="${d}" fill="none" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round"/>`;
-    })
+    .map((d) => `  <path d="${d}" fill="none" stroke="currentColor" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round"/>`)
     .join('\n');
   return `<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">\n${body}\n</svg>\n`;
-}
-
-function getPathStroke(toolId, index) {
-  if (toolId !== 'rainbow') return 'currentColor';
-  return ['#c96f72', '#e6a85d', '#e1c75d', '#83b97a', '#72a6c8', '#9477b5'][index % 6];
 }
 
 function getStrokeWidth(toolId) {
@@ -234,14 +225,11 @@ function mossPaths(v) {
 
 function smallTreePaths(v) {
   return [
-    curve(126, 214, 128, 166, 126, 118),
-    curve(126, 164, 106, 138 - v, 90, 122),
-    curve(128, 152, 150, 132 + v, 168, 112),
-    leaf(126, 126, -48, -28 - v, 0.82),
-    leaf(132, 118, 50, -34, 0.86),
-    leaf(122, 96, -36, -26, 0.72),
-    leaf(134, 92, 34, -24 - v, 0.7),
-    curve(88, 216, 126, 204, 170, 216),
+    curve(128, 210, 130, 162, 126, 116),
+    leaf(126, 128, -42, -30 - v, 0.9),
+    leaf(130, 118, 42, -34, 0.85),
+    leaf(126, 96, -30, -28, 0.72),
+    curve(94, 214, 128, 204, 166, 214),
   ];
 }
 
@@ -270,11 +258,10 @@ function breathLightPaths(v) {
 
 function moonbeamPaths(v) {
   return [
-    curve(70, 42, 120, 78, 186, 48),
-    curve(74, 80, 126, 122 + v, 194, 86),
-    curve(82, 120, 136, 164 + v, 202, 126),
-    curve(96, 160, 144, 198 + v, 206, 166),
-    smallSpark(176, 62, 8),
+    curve(86, 48, 122, 88, 166, 54),
+    curve(88, 82, 125, 120 + v, 170, 86),
+    curve(94, 118, 130, 154 + v, 176, 120),
+    curve(106, 154, 136, 184 + v, 180, 154),
   ];
 }
 
@@ -290,23 +277,12 @@ function dewPaths(v) {
 function rainPaths(v) {
   const tilt = v * 2;
   return [
-    ray(76, 40, 62 - tilt, 118),
-    ray(112, 28, 96 - tilt, 132),
-    ray(148, 44, 132 - tilt, 150),
-    ray(184, 34, 166 - tilt, 124),
-    ray(98, 142, 84 - tilt, 220),
-    ray(154, 154, 138 - tilt, 232),
-  ];
-}
-
-function rainDropPaths(v) {
-  return [
-    oval(92, 96 + v, 9 + v * 0.8, 18 + v),
-    oval(132, 122 - v, 10 + v * 0.8, 21 + v),
-    oval(172, 92 + v, 8 + v * 0.7, 17 + v),
-    ray(82, 154, 76 - v, 188 + v),
-    ray(124, 166, 118 - v, 210 + v),
-    ray(166, 150, 160 - v, 190 + v),
+    ray(90, 74, 78 - tilt, 112),
+    ray(124, 62, 112 - tilt, 106),
+    ray(160, 80, 148 - tilt, 124),
+    ray(102, 138, 90 - tilt, 178),
+    ray(144, 132, 132 - tilt, 172),
+    ray(184, 134, 172 - tilt, 174),
   ];
 }
 
@@ -405,64 +381,50 @@ function ribbonPaths(v) {
 
 function floatingLeafPaths(v) {
   return [
-    leaf(86, 128 + v, 38 + v * 2, -24, 0.74),
-    leaf(144, 102 - v, 48 + v * 2, -18, 0.68),
-    leaf(136, 168 + v, 42 + v, -26, 0.62),
-    curve(52, 154, 94, 132 - v, 134, 142, 196, 118 - v),
-    curve(64, 190, 106, 172 + v, 148, 184, 202, 160),
+    leaf(128, 130, 78 + v * 2, -28, 1.05),
+    curve(92, 144, 132, 126 - v, 170, 118),
+    curve(72, 176, 106, 160 + v, 144, 176),
   ];
 }
 
 function waterLinePaths(v) {
   return [
-    wave(34, 112 + v, 78, 98, 126, 122, 178, 104),
-    wave(50, 146 - v, 98, 130, 146, 156, 214, 134),
-    wave(36, 182 + v, 92, 166, 148, 192, 220, 172),
-    ray(54, 204, 202, 204),
+    wave(44, 116 + v, 82, 96, 124, 118, 164, 104),
+    wave(66, 148 - v, 108, 130, 154, 152, 206, 136),
+    wave(48, 180 + v, 92, 164, 140, 184, 198, 170),
   ];
 }
 
 function ripplePaths(v) {
   return [
-    `M ${128 - 24 - v * 2} ${132} C ${104} ${118 - v} ${152} ${118 - v} ${128 + 24 + v * 2} ${132}`,
-    `M ${128 - 54 - v * 3} ${138} C ${90} ${112 - v} ${166} ${112 - v} ${128 + 54 + v * 3} ${138}`,
-    `M ${128 - 86 - v * 3} ${148} C ${64} ${106 - v} ${192} ${106 - v} ${128 + 86 + v * 3} ${148}`,
-    `M ${128 - 46} ${162} C ${106} ${174 + v} ${150} ${174 + v} ${128 + 46} ${162}`,
+    oval(128, 132, 24 + v * 2, 10 + v),
+    oval(128, 132, 52 + v * 3, 19 + v),
+    oval(128, 132, 82 + v * 3, 29 + v),
   ];
 }
 
 function puddlePaths(v) {
   return [
-    `M 54 ${152 + v} C 74 ${118 - v} 116 ${134} 134 ${124} C 164 ${106 + v} 210 ${132} 208 ${160} C 188 ${192 + v} 84 ${192 - v} 54 ${152 + v}`,
-    wave(82, 154, 112, 140 - v, 146, 160 + v, 182, 146),
-    wave(88, 174, 124, 184 + v, 168, 174 - v, 194, 180),
-    smallSpark(166, 124, 8),
+    oval(128, 150, 76 + v * 2, 30 + v),
+    wave(80, 148, 110, 140 - v, 148, 152 + v, 178, 144),
+    smallSpark(160, 126, 7),
   ];
 }
 
 function snailTrailPaths(v) {
-  return snailPaths(v);
-}
-
-function snailPaths(v) {
   return [
-    circle(108, 136, 31 + v),
-    spiral(108, 136, 26 + v, 2.1),
-    curve(134, 154, 162, 150 - v, 184, 160, 202, 146 - v),
-    ray(188, 148, 202, 124),
-    ray(192, 148, 212, 130),
-    dot(204, 122, 3.5),
-    dot(214, 128, 3.5),
-    curve(78, 174, 128, 188 + v, 204, 174),
+    curve(50, 150, 92, 132 + v, 128, 152, 204, 138 - v),
+    curve(76, 172, 118, 160 - v, 156, 176, 196, 168),
+    dot(70, 146, 3.5),
+    dot(118, 153, 3.5),
+    dot(174, 143, 3.5),
   ];
 }
 
 function leafBoatPaths(v) {
   return [
-    leaf(128, 120, 104 + v * 2, -10, 1.05),
-    curve(70, 136, 126, 132 - v, 190, 122),
-    ray(126, 124, 128, 88 - v),
-    curve(120, 94, 132, 82 - v, 144, 94),
+    leaf(128, 126, 92 + v * 2, -16, 1.08),
+    curve(78, 138, 128, 128 - v, 178, 120),
     curve(70, 168, 118, 154, 180, 166),
     wave(76, 186, 118, 174 + v, 160, 188, 204, 176),
   ];
@@ -483,21 +445,17 @@ function bridgePaths(v) {
 function signpostPaths(v) {
   return [
     ray(126, 68, 126, 214),
-    `M 80 ${76 + v} L 178 ${76 + v} L 160 ${100 + v} L 80 ${100 + v} Z`,
-    `M 176 ${124 - v} L 78 ${124 - v} L 98 ${148 - v} L 176 ${148 - v} Z`,
-    ray(104, 88 + v, 150, 88 + v),
-    ray(106, 136 - v, 148, 136 - v),
-    ray(126, 104 + v, 126, 124 - v),
+    `M 84 ${76 + v} L 176 ${76 + v} L 162 ${98 + v} L 84 ${98 + v} Z`,
+    `M 172 ${124 - v} L 82 ${124 - v} L 96 ${146 - v} L 172 ${146 - v} Z`,
     curve(98, 214, 126, 204, 158, 214),
   ];
 }
 
 function stonePaths(v) {
   return [
-    `M ${54} ${160 + v} C ${66} ${118} ${104} ${112 - v} ${132} ${132} C ${154} ${104 + v} ${202} ${126} ${214} ${160} C ${192} ${198 + v} ${88} ${198 - v} ${54} ${160 + v}`,
+    `M ${64} ${158 + v} C ${74} ${120} ${104} ${112 - v} ${130} ${130} C ${154} ${108 + v} ${190} ${126} ${200} ${158} C ${184} ${188 + v} ${94} ${190 - v} ${64} ${158 + v}`,
     curve(90, 160, 120, 148 - v, 156, 158),
     curve(112, 178, 146, 168 + v, 178, 176),
-    curve(86, 142, 112, 126 + v, 134, 134),
   ];
 }
 
@@ -568,11 +526,10 @@ function mushroomPaths(v) {
 
 function rainbowPaths(v) {
   return [
-    `M 38 188 C 54 ${72 - v} 202 ${72 - v} 218 188`,
-    `M 56 188 C 70 ${96 - v} 186 ${96 - v} 200 188`,
-    `M 74 188 C 86 ${120 - v} 170 ${120 - v} 182 188`,
-    `M 92 188 C 102 ${144 - v} 154 ${144 - v} 164 188`,
-    ray(38, 188, 218, 188),
+    curve(48, 178, 72, 84 - v, 128, 72 - v, 208, 178),
+    curve(62, 182, 86, 108 - v, 128, 96 - v, 194, 182),
+    curve(78, 184, 98, 132 - v, 128, 120 - v, 178, 184),
+    curve(94, 186, 108, 152 - v, 128, 144 - v, 162, 186),
   ];
 }
 
@@ -630,18 +587,6 @@ function star(cx, cy, r) {
     points.push(`${cx + Math.cos(angle) * radius} ${cy + Math.sin(angle) * radius}`);
   }
   return `M ${points.join(' L ')} Z`;
-}
-
-function spiral(cx, cy, radius, turns) {
-  const points = [];
-  const steps = 28;
-  for (let index = 0; index <= steps; index += 1) {
-    const t = index / steps;
-    const angle = t * Math.PI * 2 * turns;
-    const r = radius * (1 - t * 0.78);
-    points.push(`${cx + Math.cos(angle) * r} ${cy + Math.sin(angle) * r}`);
-  }
-  return `M ${points.join(' L ')}`;
 }
 
 function smallSpark(cx, cy, r) {

@@ -728,9 +728,6 @@ button:disabled {
   top: auto;
   width: 42px;
   height: 42px;
-  stroke-width: 10;
-  filter: drop-shadow(0 8px 12px color-mix(in srgb, currentColor 28%, transparent));
-  opacity: 0.96;
 }
 
 .tool-entry {
