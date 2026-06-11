@@ -6,9 +6,8 @@ import { getTool } from '../data/tools';
 import ElementSvgIcon from '../components/ElementSvgIcon';
 
 function GuidePage({ mood, gardenDay, sceneState, entryTool, onChooseTool, onFreeChoose }) {
-  const tools = entryTool
-    ? [entryTool, ...gardenDay.tools.filter((toolId) => toolId !== entryTool)].slice(0, 3)
-    : gardenDay.tools.slice(0, 3);
+  const confirmedToolId = entryTool || gardenDay.tools[0];
+  const confirmedTool = getTool(confirmedToolId);
 
   return (
     <section className="screen guide-page page-enter">
@@ -35,24 +34,24 @@ function GuidePage({ mood, gardenDay, sceneState, entryTool, onChooseTool, onFre
             <strong>{mood.title}</strong>
           </div>
         </div>
-        <p className="guide-main-copy">可以先选一个元素，也可以直接自由画。停笔后，花园会把多笔线条一起整理。</p>
-        <p className="gift-title">推荐试试</p>
-        <div className="recommended-tools">
-          {tools.map((toolId) => {
-            const tool = getTool(toolId);
-            return (
-              <button key={toolId} onClick={() => onChooseTool(toolId)} style={{ '--tool-color': tool.color, color: tool.color }}>
-                <span className="guide-tool-entry" aria-hidden="true">
-                  <ElementSvgIcon toolId={toolId} size={28} />
-                </span>
-                {tool.label}
-              </button>
-            );
-          })}
+        <p className="guide-main-copy">刚才选择的是「{confirmedTool.label}」。进入画布后会先按这个元素回应；你也可以在画布下方切换元素或改成自由画。</p>
+        <div className="guide-selected-tool" style={{ '--tool-color': confirmedTool.color, color: confirmedTool.color }}>
+          <span className="guide-tool-entry" aria-hidden="true">
+            <ElementSvgIcon toolId={confirmedToolId} size={52} />
+          </span>
+          <div>
+            <p className="gift-title">当前起点</p>
+            <strong>{confirmedTool.label}</strong>
+            <small>{confirmedTool.prompt}</small>
+          </div>
         </div>
+        <SoftButton onClick={() => onChooseTool(confirmedToolId)}>
+          <Sprout size={22} />
+          进入画布
+        </SoftButton>
         <SoftButton variant="secondary" onClick={onFreeChoose}>
           <Sprout size={22} />
-          直接进入花园
+          不选元素，自由画
         </SoftButton>
       </article>
     </section>

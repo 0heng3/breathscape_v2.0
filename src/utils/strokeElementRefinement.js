@@ -6,6 +6,7 @@ const directionalTools = new Set([
   'rainbow',
   'shadow',
   'signpost',
+  'snail',
   'snailTrail',
   'soilLine',
   'softWind',

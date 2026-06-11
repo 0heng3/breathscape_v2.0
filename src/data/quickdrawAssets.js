@@ -61,6 +61,7 @@ const breathscapeAssetTools = new Set([
   'waterLine',
   'ripple',
   'puddle',
+  'snail',
   'snailTrail',
   'leafBoat',
   'bridge',

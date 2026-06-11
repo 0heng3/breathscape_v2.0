@@ -660,10 +660,11 @@ button:disabled {
   border-radius: 24px;
   color: var(--text);
   background:
-    repeating-linear-gradient(90deg, rgba(63, 58, 74, 0.018) 0 1px, transparent 1px 6px),
-    rgba(255, 255, 255, 0.68);
-  box-shadow: inset 0 0 0 1px rgba(168, 139, 232, 0.12), var(--shadow-soft);
-  backdrop-filter: blur(10px);
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--tool-color, #8f7ca7) 13%, transparent), transparent 42%),
+    repeating-linear-gradient(90deg, rgba(63, 58, 74, 0.014) 0 1px, transparent 1px 6px),
+    rgba(255, 255, 255, 0.84);
+  box-shadow: inset 0 0 0 1px rgba(168, 139, 232, 0.16), 0 18px 36px rgba(80, 64, 120, 0.12);
+  backdrop-filter: blur(6px);
   transition: transform 220ms ease, box-shadow 220ms ease, background 220ms ease;
 }
 
@@ -727,7 +728,9 @@ button:disabled {
   top: auto;
   width: 42px;
   height: 42px;
-  filter: drop-shadow(0 8px 12px color-mix(in srgb, currentColor 18%, transparent));
+  stroke-width: 10;
+  filter: drop-shadow(0 8px 12px color-mix(in srgb, currentColor 28%, transparent));
+  opacity: 0.96;
 }
 
 .tool-entry {
@@ -1734,6 +1737,7 @@ button:disabled {
   bottom: 27%;
   height: 24%;
   border-bottom: 16px solid rgba(142, 197, 232, calc(0.2 + var(--rain-level) * 0.32));
+  box-shadow: 0 10px 0 rgba(142, 197, 232, calc(var(--water-ripple-level) * 0.12));
   border-radius: 50%;
   transform: rotate(-4deg);
 }
@@ -1746,8 +1750,20 @@ button:disabled {
   height: 30%;
   border-radius: 50% 50% 20% 20%;
   background:
+    repeating-linear-gradient(12deg, rgba(122, 93, 62, calc(var(--soil-texture-level) * 0.18)) 0 2px, transparent 2px 13px),
+    repeating-linear-gradient(-9deg, rgba(122, 93, 62, calc(var(--soil-texture-level) * 0.11)) 0 1px, transparent 1px 18px),
     radial-gradient(circle at 56% 7%, rgba(255, 237, 168, 0.36), transparent 18%),
     linear-gradient(180deg, rgba(200, 169, 120, 0.48), rgba(161, 126, 82, calc(0.28 + var(--soil-level) * 0.24)));
+}
+
+.soil-mound::after {
+  position: absolute;
+  inset: 18% 10% 18%;
+  border-radius: 50%;
+  background: repeating-linear-gradient(10deg, rgba(122, 93, 62, calc(var(--soil-texture-level) * 0.28)) 0 2px, transparent 2px 16px);
+  content: "";
+  opacity: calc(0.12 + var(--soil-texture-level) * 0.68);
+  pointer-events: none;
 }
 
 .garden-lamp {
@@ -2590,6 +2606,7 @@ button:disabled {
 .response-waterLine,
 .response-ripple,
 .response-puddle,
+.response-snail,
 .response-snailTrail,
 .response-sun,
 .response-sunlight,
@@ -3413,10 +3430,46 @@ button:disabled {
   height: 74px;
 }
 
+.response-smallTree {
+  width: 118px;
+  height: 128px;
+}
+
+.response-smallTree::before {
+  position: absolute;
+  left: 50%;
+  top: 42px;
+  width: 10px;
+  height: 62px;
+  border-radius: 999px;
+  background: rgba(122, 93, 62, 0.54);
+  content: "";
+  transform: translateX(-50%);
+}
+
+.response-smallTree::after {
+  position: absolute;
+  left: 26px;
+  top: 20px;
+  width: 68px;
+  height: 48px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 28% 58%, rgba(112, 166, 126, 0.7) 0 32%, transparent 33%),
+    radial-gradient(circle at 54% 34%, rgba(112, 166, 126, 0.78) 0 36%, transparent 37%),
+    radial-gradient(circle at 76% 62%, rgba(112, 166, 126, 0.62) 0 28%, transparent 29%);
+  content: "";
+}
+
 .response-stone .response-piece {
-  width: 38px;
-  min-height: 24px;
-  box-shadow: inset -4px -5px 0 rgba(95, 77, 122, 0.1), 0 8px 0 rgba(122, 93, 62, 0.06);
+  width: 44px;
+  min-height: 28px;
+  border: 2px solid rgba(122, 93, 62, 0.24);
+  border-radius: 48% 52% 44% 56%;
+  background:
+    radial-gradient(circle at 34% 35%, rgba(255, 255, 248, 0.32) 0 13%, transparent 14%),
+    rgba(191, 163, 122, 0.52);
+  box-shadow: inset -5px -6px 0 rgba(95, 77, 122, 0.1), 0 8px 0 rgba(122, 93, 62, 0.06);
 }
 
 .response-bridge {
@@ -3463,7 +3516,7 @@ button:disabled {
   position: absolute;
   left: 50%;
   top: 24px;
-  width: 9px;
+  width: 10px;
   height: 64px;
   border-radius: 999px;
   background: rgba(122, 93, 62, 0.6);
@@ -3475,7 +3528,7 @@ button:disabled {
   position: absolute;
   left: 49%;
   top: 20px;
-  width: 58px;
+  width: 68px;
   height: 24px;
   border-radius: 12px 16px 16px 12px;
   background: linear-gradient(90deg, rgba(255, 247, 232, 0.55), rgba(191, 163, 122, 0.84));
@@ -3485,7 +3538,11 @@ button:disabled {
 }
 
 .response-signpost .response-piece {
-  opacity: 0.3;
+  width: 36px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(122, 93, 62, 0.28);
+  opacity: 0.55;
 }
 
 .response-wind,
@@ -3695,16 +3752,62 @@ button:disabled {
 
 .response-puddle::before {
   position: absolute;
-  left: 22px;
-  right: 18px;
-  top: 35px;
-  height: 33px;
-  border-radius: 50%;
+  left: 10px;
+  right: 10px;
+  top: 28px;
+  height: 48px;
+  border: 2px solid rgba(93, 154, 196, 0.28);
+  border-radius: 48% 58% 44% 56%;
   background:
-    radial-gradient(ellipse at 34% 36%, rgba(255, 255, 255, 0.54) 0 12%, transparent 13%),
-    rgba(142, 197, 232, 0.22);
+    radial-gradient(ellipse at 34% 32%, rgba(255, 255, 255, 0.72) 0 12%, transparent 13%),
+    radial-gradient(ellipse at 70% 54%, rgba(255, 255, 255, 0.34) 0 9%, transparent 10%),
+    rgba(142, 197, 232, 0.32);
   content: "";
   animation: puddleShimmer 1900ms ease-in-out infinite;
+}
+
+.response-puddle .response-piece {
+  width: 24px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 248, 0.38);
+}
+
+.response-snail {
+  width: 128px;
+  height: 92px;
+}
+
+.response-snail::before {
+  position: absolute;
+  left: 30px;
+  top: 28px;
+  width: 42px;
+  height: 42px;
+  border: 6px solid rgba(191, 163, 122, 0.72);
+  border-radius: 50%;
+  background: radial-gradient(circle, transparent 0 26%, rgba(255, 247, 232, 0.42) 27% 46%, transparent 47%);
+  box-shadow: inset 0 0 0 6px rgba(191, 163, 122, 0.2);
+  content: "";
+}
+
+.response-snail::after {
+  position: absolute;
+  left: 66px;
+  top: 48px;
+  width: 48px;
+  height: 22px;
+  border-radius: 999px 999px 70% 70%;
+  background: rgba(191, 163, 122, 0.58);
+  box-shadow: 22px -18px 0 -9px rgba(191, 163, 122, 0.62), 29px -14px 0 -10px rgba(191, 163, 122, 0.62);
+  content: "";
+}
+
+.response-snail .response-piece {
+  width: 26px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(216, 225, 230, 0.48);
 }
 
 .response-snailTrail {
@@ -3724,9 +3827,21 @@ button:disabled {
   height: 132px;
 }
 
+.response-rain .response-piece {
+  width: 5px;
+  height: 54px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, transparent, rgba(93, 154, 196, 0.62));
+  animation: softRainFall 1800ms ease-in-out infinite;
+}
+
 .response-rainDrop .response-piece {
-  width: 9px;
-  border-radius: 999px 999px 70% 70%;
+  width: 13px;
+  height: 18px;
+  border-radius: 55% 55% 70% 70%;
+  background:
+    radial-gradient(circle at 38% 30%, rgba(255, 255, 255, 0.72) 0 20%, transparent 21%),
+    rgba(93, 154, 196, 0.62);
 }
 
 .response-dew {
@@ -3854,29 +3969,37 @@ button:disabled {
 }
 
 .response-moonbeam {
-  width: 132px;
-  height: 142px;
+  width: 170px;
+  height: 160px;
 }
 
 .response-moonbeam .response-piece {
-  width: 26px;
-  height: 104px;
+  width: 34px;
+  height: 132px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 248, 205, 0.62), rgba(255, 248, 205, 0.08));
+  box-shadow: 0 0 28px rgba(247, 201, 72, 0.18);
+  opacity: 0.7;
 }
 
 .response-rainbow {
-  width: 158px;
-  height: 96px;
+  width: 176px;
+  height: 116px;
 }
 
 .response-rainbow::before {
   position: absolute;
-  left: 14px;
-  right: 14px;
-  top: 38px;
-  height: 42px;
-  border-top: 9px solid rgba(245, 168, 200, 0.66);
+  left: 8px;
+  right: 8px;
+  top: 24px;
+  height: 74px;
+  border-top: 10px solid rgba(214, 120, 128, 0.66);
   border-radius: 50%;
-  box-shadow: 0 10px 0 rgba(247, 201, 72, 0.34), 0 20px 0 rgba(142, 197, 232, 0.28), 0 30px 0 rgba(158, 216, 195, 0.24);
+  box-shadow:
+    0 11px 0 rgba(230, 182, 93, 0.48),
+    0 22px 0 rgba(158, 216, 195, 0.42),
+    0 33px 0 rgba(121, 168, 199, 0.36),
+    0 44px 0 rgba(154, 131, 184, 0.3);
   content: "";
   animation: rainbowUnfold 2200ms ease-in-out infinite;
 }
@@ -5350,11 +5473,46 @@ button:disabled {
   transform-origin: center;
   pointer-events: none;
   contain: layout paint;
+  color: var(--element-tone);
+  mix-blend-mode: multiply;
 }
 
 .quickdraw-element svg {
   width: 100%;
   height: 100%;
+}
+
+.quickdraw-element--puddle,
+.quickdraw-element--ripple,
+.quickdraw-element--waterLine {
+  mix-blend-mode: normal;
+  filter: drop-shadow(0 8px 14px rgba(87, 137, 164, 0.16));
+}
+
+.quickdraw-element--rain,
+.quickdraw-element--rainDrop {
+  mix-blend-mode: normal;
+  filter: drop-shadow(0 8px 12px rgba(87, 137, 164, 0.14));
+}
+
+.quickdraw-element--snail,
+.quickdraw-element--stone,
+.quickdraw-element--signpost,
+.quickdraw-element--smallTree {
+  filter: drop-shadow(0 8px 12px rgba(122, 93, 62, 0.14));
+}
+
+.quickdraw-element--rainbow {
+  color: #c77f78;
+  mix-blend-mode: normal;
+  filter: drop-shadow(0 10px 16px rgba(150, 110, 148, 0.16));
+}
+
+.quickdraw-element--moonbeam {
+  color: #d6bc72;
+  filter:
+    drop-shadow(0 0 10px rgba(247, 201, 72, 0.28))
+    drop-shadow(0 0 26px rgba(255, 250, 220, 0.22));
 }
 
 .quickdraw-element--lantern,
@@ -5855,6 +6013,111 @@ button:disabled {
   transform: translate(-50%, calc(-50% - 8px)) rotate(13deg);
 }
 
+/* Final semantic visual overrides for the curated BreathScape SVG/tool set. */
+.external-svg-glyph--local svg {
+  width: 100%;
+  height: 100%;
+}
+
+.response-snail {
+  width: 128px;
+  height: 92px;
+  filter: drop-shadow(0 7px 10px rgba(122, 93, 62, 0.1));
+}
+
+.response-snail::before {
+  position: absolute;
+  left: 28px;
+  top: 24px;
+  width: 48px;
+  height: 48px;
+  border: 6px solid rgba(191, 163, 122, 0.74);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, transparent 0 24%, rgba(255, 247, 232, 0.46) 25% 44%, transparent 45%),
+    rgba(255, 247, 232, 0.24);
+  box-shadow: inset 0 0 0 6px rgba(191, 163, 122, 0.18);
+  content: "";
+}
+
+.response-snail::after {
+  position: absolute;
+  left: 68px;
+  top: 48px;
+  width: 50px;
+  height: 22px;
+  border-radius: 999px 999px 70% 70%;
+  background: rgba(191, 163, 122, 0.58);
+  box-shadow:
+    21px -19px 0 -9px rgba(191, 163, 122, 0.62),
+    30px -14px 0 -10px rgba(191, 163, 122, 0.62);
+  content: "";
+}
+
+.response-snail .response-piece {
+  width: 24px;
+  height: 5px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(216, 225, 230, 0.42);
+  transform: translate(-50%, -50%) rotate(var(--piece-rotate));
+  animation: snailLine 1600ms ease-out both;
+  animation-delay: var(--piece-delay);
+}
+
+.response-puddle::before {
+  left: 10px;
+  right: 10px;
+  top: 28px;
+  height: 48px;
+  border: 2px solid rgba(93, 154, 196, 0.28);
+  border-radius: 48% 58% 44% 56%;
+  background:
+    radial-gradient(ellipse at 34% 32%, rgba(255, 255, 255, 0.72) 0 12%, transparent 13%),
+    radial-gradient(ellipse at 70% 54%, rgba(255, 255, 255, 0.34) 0 9%, transparent 10%),
+    rgba(142, 197, 232, 0.32);
+}
+
+.response-rain .response-piece {
+  width: 5px;
+  height: 54px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, transparent, rgba(93, 154, 196, 0.62));
+}
+
+.response-rainDrop .response-piece {
+  width: 13px;
+  height: 18px;
+  border: 0;
+  border-radius: 55% 55% 70% 70%;
+  background:
+    radial-gradient(circle at 38% 30%, rgba(255, 255, 255, 0.72) 0 20%, transparent 21%),
+    rgba(93, 154, 196, 0.62);
+}
+
+.response-moonbeam .response-piece {
+  width: 34px;
+  height: 132px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 248, 205, 0.62), rgba(255, 248, 205, 0.08));
+  box-shadow: 0 0 28px rgba(247, 201, 72, 0.18);
+  opacity: 0.7;
+}
+
+.response-rainbow::before {
+  left: 8px;
+  right: 8px;
+  top: 24px;
+  height: 74px;
+  border-top: 10px solid rgba(214, 120, 128, 0.66);
+  box-shadow:
+    0 11px 0 rgba(230, 182, 93, 0.48),
+    0 22px 0 rgba(158, 216, 195, 0.42),
+    0 33px 0 rgba(121, 168, 199, 0.36),
+    0 44px 0 rgba(154, 131, 184, 0.3);
+}
+
 .guide-tool-entry {
   position: relative;
   display: inline-grid;
@@ -5867,6 +6130,45 @@ button:disabled {
 
 .guide-tool-entry .tool-button__glyph-art.tool-entry {
   transform: translate(-50%, calc(-50% - 6px)) scale(0.48);
+}
+
+.guide-selected-tool {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(168, 139, 232, 0.13);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.78), transparent 34%),
+    color-mix(in srgb, var(--tool-color, #8f7ca7) 10%, rgba(255, 249, 226, 0.76));
+  box-shadow: inset 0 0 0 1px rgba(247, 201, 72, 0.12), 0 14px 30px rgba(80, 64, 120, 0.08);
+}
+
+.guide-selected-tool .guide-tool-entry {
+  width: 68px;
+  height: 58px;
+  border-radius: 20px;
+  background: rgba(255, 255, 248, 0.58);
+  box-shadow: inset 0 0 0 1px rgba(168, 139, 232, 0.1);
+}
+
+.guide-selected-tool strong {
+  display: block;
+  color: var(--text);
+  font-size: 24px;
+  font-weight: 850;
+  line-height: 1.1;
+}
+
+.guide-selected-tool small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 780;
+  line-height: 1.35;
 }
 
 @media (max-width: 900px) {

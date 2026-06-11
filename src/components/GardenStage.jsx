@@ -1,5 +1,6 @@
 import React from 'react';
 import { initialSceneState } from '../utils/sceneState';
+import QuickDrawElementLayer from './QuickDrawElementLayer';
 
 function GardenStage({
   mood,
@@ -25,6 +26,8 @@ function GardenStage({
         '--wind-level': sceneState.windEnergy,
         '--rain-level': sceneState.rainDensity,
         '--soil-level': sceneState.soilWetness,
+        '--soil-texture-level': sceneState.soilTexture || 0,
+        '--water-ripple-level': sceneState.waterRipple || 0,
         '--grass-level': sceneState.grassCoverage,
         '--flower-level': sceneState.flowerBloom,
         '--sun-level': sceneState.sunlightWarmth,
@@ -81,8 +84,9 @@ function GardenStage({
       )}
       <div className="soil-wetness" />
       <span className="gesture-wind-ribbon" />
+      <QuickDrawElementLayer items={[...elementHistory, ...liveResponses].filter((item) => item.assetPath)} sceneState={sceneState} />
       <div className="breathscape-element-layer" aria-hidden="true">
-        {[...elementHistory, ...liveResponses].map((item, index) => (
+        {[...elementHistory, ...liveResponses].filter((item) => !item.assetPath).map((item, index) => (
           <ResponseCluster item={item} index={index} live={Boolean(item.live)} key={item.id || `${item.tool}-${index}`} />
         ))}
       </div>
@@ -201,6 +205,7 @@ function getResponseCount(tool, intensity) {
     waterLine: 4,
     ripple: 4,
     puddle: 4,
+    snail: 3,
     grass: 5,
     seed: 4,
     reed: 5,
@@ -250,6 +255,7 @@ function getPieceStyle(tool, index) {
     waterLine: [20, 8],
     ripple: [18, 12],
     puddle: [18, 12],
+    snail: [16, 10],
     grass: [14, 5],
     seed: [12, 7],
     memorySeed: [18, 12],
@@ -378,6 +384,7 @@ function getToolFamily(tool) {
   if (tool === 'waterLine') return 'waterLine';
   if (tool === 'ripple') return 'ripple';
   if (tool === 'puddle') return 'puddle';
+  if (tool === 'snail') return 'snail';
   if (tool === 'snailTrail') return 'snailTrail';
   if (tool === 'grass') return 'grass';
   if (tool === 'seed') return 'seed';
@@ -411,7 +418,7 @@ function getToolFamily(tool) {
 }
 
 function isGroundTool(tool) {
-  return ['grass', 'flower', 'seed', 'memorySeed', 'moss', 'stone', 'mushroom', 'sprout', 'bud', 'firstFlower', 'reed', 'quietFlower', 'bridge', 'soilLine', 'signpost', 'smallTree'].includes(tool);
+  return ['grass', 'flower', 'seed', 'memorySeed', 'moss', 'stone', 'mushroom', 'sprout', 'bud', 'firstFlower', 'reed', 'quietFlower', 'bridge', 'soilLine', 'signpost', 'smallTree', 'snail'].includes(tool);
 }
 
 function clampPercent(value, size, min, max) {

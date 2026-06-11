@@ -1,7 +1,10 @@
 <svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-  <path d="M 128 210 Q 130 162 126 116" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M 126 128 C 118.44 98.76 93.24000000000001 95.36 88.19999999999999 97.4 C 104.16 121.2 120.96 125.96 126 128" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M 130 118 C 137.56 88.76 162.76 85.36 165.7 89.1 C 151.84 111.2 135.04 115.96 130 118" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M 126 96 C 120.6 71.92 102.6 69.12 104.4 75.84 C 110.4 90.4 122.4 94.32 126 96" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M 94 214 Q 128 204 166 214" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 126 214 Q 128 166 126 118" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 126 164 Q 106 134 90 122" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 128 152 Q 150 136 168 112" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 126 126 C 117.36 98.48 88.56 95.28 86.64 99.76 C 101.03999999999999 119.6 120.24 124.08 126 126" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 132 118 C 141 88.76 171 85.36 175 88.76 C 158 111.2 138 115.96 132 118" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 122 96 C 115.52 73.64 93.92 71.03999999999999 96.08 77.28 C 103.28 90.8 117.68 94.44 122 96" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 134 92 C 140.12 67.92 160.52 65.12 157.8 72.4 C 151.68 86.4 138.08 90.32 134 92" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 88 216 Q 126 204 170 216" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

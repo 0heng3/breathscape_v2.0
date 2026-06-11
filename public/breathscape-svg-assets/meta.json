@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-11T08:53:40.074Z",
+  "generatedAt": "2026-06-11T09:54:59.026Z",
   "source": "BreathScape generated SVG rules; QuickDraw remains recognition reference only.",
   "viewBox": "0 0 256 256",
   "variantCount": 5,
@@ -220,6 +220,13 @@
       "/breathscape-svg-assets/puddle/puddle_003.svg",
       "/breathscape-svg-assets/puddle/puddle_004.svg",
       "/breathscape-svg-assets/puddle/puddle_005.svg"
+    ],
+    "snail": [
+      "/breathscape-svg-assets/snail/snail_001.svg",
+      "/breathscape-svg-assets/snail/snail_002.svg",
+      "/breathscape-svg-assets/snail/snail_003.svg",
+      "/breathscape-svg-assets/snail/snail_004.svg",
+      "/breathscape-svg-assets/snail/snail_005.svg"
     ],
     "snailTrail": [
       "/breathscape-svg-assets/snailTrail/snailTrail_001.svg",

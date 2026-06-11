@@ -340,10 +340,21 @@ Object.assign(toolElementMap, {
     feedbackText: '现在画出来的都会变成涟漪，水面会轻轻散开。',
     allowedZones: commonPlacement.water,
   }),
-  snailTrail: aliasTool('snailTrail', 'waterLine', {
-    label: '蜗牛线',
-    feedbackText: '现在画出来的都会变成蜗牛线，会慢慢爬。',
+  snail: aliasTool('snail', 'mushroom', {
+    categories: ['snail', 'circle', 'squiggle'],
+    label: '蜗牛',
+    placementRule: 'groundSprout',
+    maxCountPerStroke: 3,
+    stateEffect: { pathCompletion: 0.04, calmLevel: 0.08, soilWetness: 0.02 },
+    soundEffect: 'soil',
+    feedbackText: '现在画出来的都会变成蜗牛，会慢慢爬出来。',
     allowedZones: commonPlacement.ground,
+    fallbackIfWrongZone: 'ground',
+  }),
+  snailTrail: aliasTool('snailTrail', 'snail', {
+    categories: ['snail', 'circle', 'squiggle'],
+    label: '蜗牛',
+    feedbackText: '现在画出来的都会变成蜗牛，会慢慢爬出来。',
   }),
   signpost: aliasTool('signpost', 'bridge', {
     label: '路牌',
@@ -436,7 +447,7 @@ function aliasTool(id, baseId, overrides = {}) {
     categories,
     label: overrides.label || base.label,
     toolbarGlyph: overrides.toolbarGlyph || base.toolbarGlyph,
-    assetVariants: overrides.assetVariants || base.assetVariants,
+    assetVariants: overrides.assetVariants || [],
     placementRule: overrides.placementRule || base.placementRule,
     maxCountPerStroke: overrides.maxCountPerStroke || base.maxCountPerStroke,
     stateEffect: { ...base.stateEffect, ...overrides.stateEffect },
@@ -473,7 +484,7 @@ function resolveToolColor(toolId, tool) {
   if (['sunlight', 'sun', 'lantern', 'breathLight', 'windowLight', 'moonbeam'].includes(toolId)) return '#9A8560';
   if (toolId === 'cloud') return '#70829A';
   if (['windLine', 'softWind', 'windBell', 'ribbon', 'floatingLeaf', 'wind'].includes(toolId)) return '#6D7E9B';
-  if (['rain', 'rainDrop', 'dew', 'waterLine', 'leafBoat', 'puddle', 'ripple', 'snailTrail'].includes(toolId)) return '#6E8CA2';
+  if (['rain', 'rainDrop', 'dew', 'waterLine', 'leafBoat', 'puddle', 'ripple', 'snail', 'snailTrail'].includes(toolId)) return '#6E8CA2';
   if (['star', 'moon', 'firefly', 'constellationLine'].includes(toolId)) return '#7C739C';
   if (toolId === 'rainbow') return '#8C7AA7';
   if (toolId === 'memorySeed') return '#87715F';

@@ -68,7 +68,7 @@ export function playLiveElementTone(type, features = {}, muted = false) {
 
 function getSoundFamily(type) {
   if (['wind', 'windLine', 'softWind', 'cloud', 'ribbon', 'floatingLeaf', 'windBell'].includes(type)) return 'wind';
-  if (['rain', 'rainDrop', 'dew', 'waterLine', 'ripple', 'puddle', 'snailTrail', 'leafBoat'].includes(type)) return 'rain';
+  if (['rain', 'rainDrop', 'dew', 'waterLine', 'ripple', 'puddle', 'snail', 'snailTrail', 'leafBoat'].includes(type)) return 'rain';
   if (['grass', 'seed', 'reed', 'moss', 'smallTree', 'sprout', 'memorySeed'].includes(type)) return 'plant';
   if (['flower', 'firstFlower', 'bud', 'quietFlower', 'mushroom'].includes(type)) return 'bloom';
   if (['sun', 'sunlight', 'lantern', 'firefly', 'moon', 'windowLight', 'breathLight'].includes(type)) return 'light';
@@ -140,7 +140,7 @@ function playWaterGesture(audio, type, speed, time) {
     tone(audio, { time: time + 0.08, frequency: 310 + speed * 60, endFrequency: 260, duration: 0.34, gain: 0.022, type: 'triangle' });
     return;
   }
-  if (type === 'snailTrail') {
+  if (type === 'snail' || type === 'snailTrail') {
     filteredNoise(audio, { time, duration: 0.64, gain: 0.018 + speed * 0.014, filter: 'lowpass', frequency: 620, q: 0.35, attack: 0.08 });
     tone(audio, { time: time + 0.1, frequency: 520, endFrequency: 360, duration: 0.46, gain: 0.018, type: 'sine' });
     return;
@@ -165,7 +165,7 @@ function playWaterLive(audio, type, intensity, time) {
     filteredNoise(audio, { time, duration: 0.16, gain: 0.018 + intensity * 0.018, filter: 'lowpass', frequency: 460 + intensity * 120, q: 0.5, attack: 0.02 });
     return;
   }
-  if (type === 'snailTrail') {
+  if (type === 'snail' || type === 'snailTrail') {
     filteredNoise(audio, { time, duration: 0.2, gain: 0.012 + intensity * 0.012, filter: 'lowpass', frequency: 540, q: 0.35, attack: 0.03 });
     return;
   }
@@ -177,7 +177,7 @@ function playWaterLive(audio, type, intensity, time) {
 }
 
 function playWaterPlink(audio, time, intensity, type) {
-  const high = type === 'dew' ? 980 : type === 'snailTrail' ? 740 : 620;
+  const high = type === 'dew' ? 980 : (type === 'snail' || type === 'snailTrail') ? 740 : 620;
   tone(audio, {
     time,
     frequency: high + intensity * 220,

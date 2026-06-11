@@ -53,7 +53,7 @@ function AnimatedQuickDrawGlyph({
           d={path.d}
           pathLength="100"
           fill="none"
-          stroke="currentColor"
+          stroke={path.stroke || 'currentColor'}
           strokeWidth={resolvedAssetPath ? path.strokeWidth || 8 : strokeWidth || variant?.strokeWidth || 5}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -110,9 +110,11 @@ function parseQuickDrawSvg(svg) {
       const d = attributes.match(/\bd="([^"]+)"/)?.[1];
       if (!d) return null;
       const strokeWidth = Number(attributes.match(/\bstroke-width="([^"]+)"/)?.[1]);
+      const stroke = attributes.match(/\bstroke="([^"]+)"/)?.[1];
       return {
         d,
         strokeWidth: Number.isFinite(strokeWidth) ? strokeWidth : 8,
+        stroke,
       };
     })
     .filter(Boolean);

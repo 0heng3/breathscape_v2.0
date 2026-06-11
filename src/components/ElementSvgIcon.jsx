@@ -21,6 +21,8 @@ import { SunHorizonIcon as SunHorizon } from '@phosphor-icons/react/dist/csr/Sun
 import { TreeIcon as Tree } from '@phosphor-icons/react/dist/csr/Tree';
 import { WavesIcon as Waves } from '@phosphor-icons/react/dist/csr/Waves';
 import React from 'react';
+import AnimatedQuickDrawGlyph from './AnimatedQuickDrawGlyph';
+import { getQuickDrawAssetVariant } from '../data/quickdrawAssets';
 
 const ICONS = {
   seed: Grains,
@@ -63,11 +65,20 @@ const ICONS = {
   rainbow: Rainbow,
   mushroom: PottedPlant,
   snailTrail: Path,
+  snail: PottedPlant,
   signpost: Bridge,
   shadow: Cloud,
 };
 
 function ElementSvgIcon({ toolId, size = 34 }) {
+  const assetPath = getQuickDrawAssetVariant(toolId, 0)?.assetPath;
+  if (assetPath) {
+    return (
+      <span className="external-svg-glyph external-svg-glyph--local" aria-hidden="true">
+        <AnimatedQuickDrawGlyph toolId={toolId} assetPath={assetPath} size={size} width={size} height={size} animated={false} />
+      </span>
+    );
+  }
   const Icon = ICONS[toolId] || Sparkle;
   return (
     <span className="external-svg-glyph" aria-hidden="true">

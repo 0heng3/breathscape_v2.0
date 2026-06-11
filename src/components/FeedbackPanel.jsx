@@ -140,7 +140,8 @@ function getToolSceneLine(toolId) {
     constellationLine: '星光会被轻轻连起来。',
     leafBoat: '叶船会沿着水走。',
     floatingLeaf: '叶子会被风带着走。',
-    snailTrail: '蜗牛线会慢慢留下来。',
+    snail: '蜗牛会慢慢爬出来。',
+    snailTrail: '蜗牛会慢慢爬出来。',
   };
   return lines[toolId] || '场景会接住这一笔，并整理成识别到的元素。';
 }

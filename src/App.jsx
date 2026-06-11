@@ -184,6 +184,7 @@ function App() {
     const recommended = preferredToolId || gardenDay.recommendedByMood?.[sceneId]?.[0] || gardenDay.tools[0] || 'seed';
     selectedToolRef.current = recommended;
     setSelectedTool(recommended);
+    setFeedback(`当前选择：${getToolElement(recommended).label}。进入画布后会先按这个元素回应。`);
   }
 
   function goBack() {
@@ -533,7 +534,7 @@ function App() {
           <StartPage mood={mood} selectedDay={selectedDay} onSelectDay={chooseDay} onStart={startGarden} onOpenDiary={() => navigate('/diary-list')} />
         )}
         {route === '/mood-scene' && (
-          <MoodPage selectedMood={selectedScene} selectedToolId={entryTool} gardenDay={gardenDay} onSelectMood={chooseScene} onContinue={() => navigate('/guide')} />
+          <MoodPage selectedMood={selectedScene} selectedToolId={selectedTool} gardenDay={gardenDay} onSelectMood={chooseScene} onContinue={() => navigate('/guide')} />
         )}
         {route === '/guide' && (
           <GuidePage
@@ -808,7 +809,7 @@ function getRecognitionSceneEffect(toolId) {
     dew: '雨水落下来，土地喝到了一点水。',
     rain: '雨落下来，土地和水面都有了变化。',
     rainDrop: '雨滴落下来，土地和水面都有了变化。',
-    soilLine: '地面多了一些柔和的土壤纹理。',
+    soilLine: '地面多了清楚的土壤纹理。',
     flower: '花轻轻打开了一点。',
     firstFlower: '花轻轻打开了一点。',
     bud: '花苞轻轻打开了一点。',
@@ -820,11 +821,11 @@ function getRecognitionSceneEffect(toolId) {
     ribbon: '彩带在空中轻轻飘起来。',
     waterLine: '水面多了一道流动的线。',
     ripple: '水面轻轻散开了一圈。',
-    puddle: '地面多了一点柔和反光。',
+    puddle: '地面出现一小片水洼和反光。',
     star: '星空里多了一点闪光。',
     firefly: '夜色里多了一点萤火。',
     moon: '夜色变得更安静。',
-    moonbeam: '月光让雾变轻了一点。',
+    moonbeam: '月光变亮，雾也轻了一点。',
     lantern: '局部暖光扩大了一点。',
     breathLight: '小角落暖了一点。',
     windowLight: '远处亮了一点。',
@@ -835,11 +836,12 @@ function getRecognitionSceneEffect(toolId) {
     smallTree: '角落里多了一点稳定的绿色。',
     signpost: '小路方向更清楚了一点。',
     shadow: '角落安静了一点。',
-    rainbow: '天空多了一道柔和的彩虹。',
+    rainbow: '天空出现一段清楚的多层彩虹。',
     constellationLine: '星光被轻轻连起来。',
     leafBoat: '叶船沿着水走了一小段。',
     floatingLeaf: '叶子被风轻轻带走。',
-    snailTrail: '蜗牛线慢慢留下来。',
+    snail: '小蜗牛慢慢爬出来。',
+    snailTrail: '小蜗牛慢慢爬出来。',
     sprout: '土里冒出了一点新意。',
     reed: '岸边长高了一点。',
   };

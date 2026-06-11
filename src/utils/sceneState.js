@@ -134,14 +134,16 @@ export function updateSceneState(tool, stroke, state) {
     case 'ripple':
     case 'puddle':
     case 'leafBoat':
+    case 'snail':
     case 'snailTrail':
-      next.rainDensity = clamp(next.rainDensity + (0.14 + speed * 0.08) * scale, 0, 1);
+      next.rainDensity = clamp(next.rainDensity + (tool === 'rainDrop' ? 0.08 : 0.14 + speed * 0.08) * scale, 0, 1);
       next.soilWetness = clamp(next.soilWetness + (0.14 + (stroke.densityLocal || 0) * 0.24) * scale, 0, 1);
       next.waterFlow = clamp((next.waterFlow || 0) + (0.08 + speed * 0.05) * scale, 0, 1);
-      next.waterRipple = clamp((next.waterRipple || 0) + (0.08 + speed * 0.08) * scale, 0, 1);
+      next.waterRipple = clamp((next.waterRipple || 0) + (tool === 'puddle' ? 0.18 : 0.08 + speed * 0.08) * scale, 0, 1);
       next.plantGlow = clamp((next.plantGlow || 0) + 0.04 * scale, 0, 1);
       next.brightness = clamp(next.brightness + 0.01 * scale, 0.65, 0.96);
       if (next.soilWetness > 0.28) next.grassCoverage = clamp(next.grassCoverage + 0.05, 0, 1);
+      if (tool === 'snail') next.calmLevel = clamp(next.calmLevel + 0.08 * scale, 0, 1);
       break;
     case 'grass':
     case 'seed':
@@ -188,7 +190,11 @@ export function updateSceneState(tool, stroke, state) {
     case 'soilLine':
     case 'shadow':
       next.pathCompletion = clamp((next.pathCompletion || 0) + 0.16 * scale, 0, 1);
-      if (tool === 'soilLine' || tool === 'shadow') next.soilTexture = clamp((next.soilTexture || 0) + 0.14 * scale, 0, 1);
+      if (tool === 'soilLine') {
+        next.soilTexture = clamp((next.soilTexture || 0) + 0.24 * scale, 0, 1);
+        next.soilWetness = clamp((next.soilWetness || 0) + 0.03 * scale, 0, 1);
+      }
+      if (tool === 'shadow') next.soilTexture = clamp((next.soilTexture || 0) + 0.08 * scale, 0, 1);
       next.calmLevel = clamp(next.calmLevel + 0.04 * scale, 0, 1);
       break;
     case 'constellationLine':
@@ -312,7 +318,7 @@ export function getSceneClues(state) {
 
 function getToolFamily(tool) {
   if (['wind', 'windLine', 'softWind', 'cloud', 'ribbon', 'floatingLeaf', 'windBell'].includes(tool)) return 'wind';
-  if (['rain', 'rainDrop', 'dew', 'waterLine', 'ripple', 'puddle', 'snailTrail', 'leafBoat'].includes(tool)) return 'rain';
+  if (['rain', 'rainDrop', 'dew', 'waterLine', 'ripple', 'puddle', 'snail', 'snailTrail', 'leafBoat'].includes(tool)) return 'rain';
   if (['grass', 'seed', 'reed', 'moss', 'smallTree', 'sprout', 'memorySeed'].includes(tool)) return 'grass';
   if (['flower', 'firstFlower', 'bud', 'quietFlower', 'mushroom'].includes(tool)) return 'flower';
   if (['sun', 'sunlight', 'lantern', 'firefly', 'moon', 'windowLight', 'breathLight', 'star', 'moonbeam'].includes(tool)) return 'sun';

@@ -14,6 +14,7 @@ export const quickdrawElementGrammar = {
   ripple: grammar('water', ['pond', 'circle'], 'water', 'pond'),
   puddle: grammar('water', ['pond', 'circle'], 'water', 'pond'),
   leafBoat: grammar('water', ['leaf'], 'water', 'leaf'),
+  snail: grammar('water', ['snail', 'circle', 'squiggle'], 'water', 'snail'),
   snailTrail: grammar('water', ['snail', 'squiggle'], 'water', 'snail'),
 
   grass: grammar('plant', ['grass'], 'plant', 'grass'),
