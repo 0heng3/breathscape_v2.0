@@ -1,0 +1,316 @@
+{
+  "generatedAt": "2026-06-11T08:53:40.074Z",
+  "source": "BreathScape generated SVG rules; QuickDraw remains recognition reference only.",
+  "viewBox": "0 0 256 256",
+  "variantCount": 5,
+  "tools": {
+    "seed": [
+      "/breathscape-svg-assets/seed/seed_001.svg",
+      "/breathscape-svg-assets/seed/seed_002.svg",
+      "/breathscape-svg-assets/seed/seed_003.svg",
+      "/breathscape-svg-assets/seed/seed_004.svg",
+      "/breathscape-svg-assets/seed/seed_005.svg"
+    ],
+    "memorySeed": [
+      "/breathscape-svg-assets/memorySeed/memorySeed_001.svg",
+      "/breathscape-svg-assets/memorySeed/memorySeed_002.svg",
+      "/breathscape-svg-assets/memorySeed/memorySeed_003.svg",
+      "/breathscape-svg-assets/memorySeed/memorySeed_004.svg",
+      "/breathscape-svg-assets/memorySeed/memorySeed_005.svg"
+    ],
+    "garden": [
+      "/breathscape-svg-assets/garden/garden_001.svg",
+      "/breathscape-svg-assets/garden/garden_002.svg",
+      "/breathscape-svg-assets/garden/garden_003.svg",
+      "/breathscape-svg-assets/garden/garden_004.svg",
+      "/breathscape-svg-assets/garden/garden_005.svg"
+    ],
+    "grass": [
+      "/breathscape-svg-assets/grass/grass_001.svg",
+      "/breathscape-svg-assets/grass/grass_002.svg",
+      "/breathscape-svg-assets/grass/grass_003.svg",
+      "/breathscape-svg-assets/grass/grass_004.svg",
+      "/breathscape-svg-assets/grass/grass_005.svg"
+    ],
+    "reed": [
+      "/breathscape-svg-assets/reed/reed_001.svg",
+      "/breathscape-svg-assets/reed/reed_002.svg",
+      "/breathscape-svg-assets/reed/reed_003.svg",
+      "/breathscape-svg-assets/reed/reed_004.svg",
+      "/breathscape-svg-assets/reed/reed_005.svg"
+    ],
+    "sprout": [
+      "/breathscape-svg-assets/sprout/sprout_001.svg",
+      "/breathscape-svg-assets/sprout/sprout_002.svg",
+      "/breathscape-svg-assets/sprout/sprout_003.svg",
+      "/breathscape-svg-assets/sprout/sprout_004.svg",
+      "/breathscape-svg-assets/sprout/sprout_005.svg"
+    ],
+    "moss": [
+      "/breathscape-svg-assets/moss/moss_001.svg",
+      "/breathscape-svg-assets/moss/moss_002.svg",
+      "/breathscape-svg-assets/moss/moss_003.svg",
+      "/breathscape-svg-assets/moss/moss_004.svg",
+      "/breathscape-svg-assets/moss/moss_005.svg"
+    ],
+    "smallTree": [
+      "/breathscape-svg-assets/smallTree/smallTree_001.svg",
+      "/breathscape-svg-assets/smallTree/smallTree_002.svg",
+      "/breathscape-svg-assets/smallTree/smallTree_003.svg",
+      "/breathscape-svg-assets/smallTree/smallTree_004.svg",
+      "/breathscape-svg-assets/smallTree/smallTree_005.svg"
+    ],
+    "sunlight": [
+      "/breathscape-svg-assets/sunlight/sunlight_001.svg",
+      "/breathscape-svg-assets/sunlight/sunlight_002.svg",
+      "/breathscape-svg-assets/sunlight/sunlight_003.svg",
+      "/breathscape-svg-assets/sunlight/sunlight_004.svg",
+      "/breathscape-svg-assets/sunlight/sunlight_005.svg"
+    ],
+    "sun": [
+      "/breathscape-svg-assets/sun/sun_001.svg",
+      "/breathscape-svg-assets/sun/sun_002.svg",
+      "/breathscape-svg-assets/sun/sun_003.svg",
+      "/breathscape-svg-assets/sun/sun_004.svg",
+      "/breathscape-svg-assets/sun/sun_005.svg"
+    ],
+    "breathLight": [
+      "/breathscape-svg-assets/breathLight/breathLight_001.svg",
+      "/breathscape-svg-assets/breathLight/breathLight_002.svg",
+      "/breathscape-svg-assets/breathLight/breathLight_003.svg",
+      "/breathscape-svg-assets/breathLight/breathLight_004.svg",
+      "/breathscape-svg-assets/breathLight/breathLight_005.svg"
+    ],
+    "moonbeam": [
+      "/breathscape-svg-assets/moonbeam/moonbeam_001.svg",
+      "/breathscape-svg-assets/moonbeam/moonbeam_002.svg",
+      "/breathscape-svg-assets/moonbeam/moonbeam_003.svg",
+      "/breathscape-svg-assets/moonbeam/moonbeam_004.svg",
+      "/breathscape-svg-assets/moonbeam/moonbeam_005.svg"
+    ],
+    "dew": [
+      "/breathscape-svg-assets/dew/dew_001.svg",
+      "/breathscape-svg-assets/dew/dew_002.svg",
+      "/breathscape-svg-assets/dew/dew_003.svg",
+      "/breathscape-svg-assets/dew/dew_004.svg",
+      "/breathscape-svg-assets/dew/dew_005.svg"
+    ],
+    "rain": [
+      "/breathscape-svg-assets/rain/rain_001.svg",
+      "/breathscape-svg-assets/rain/rain_002.svg",
+      "/breathscape-svg-assets/rain/rain_003.svg",
+      "/breathscape-svg-assets/rain/rain_004.svg",
+      "/breathscape-svg-assets/rain/rain_005.svg"
+    ],
+    "rainDrop": [
+      "/breathscape-svg-assets/rainDrop/rainDrop_001.svg",
+      "/breathscape-svg-assets/rainDrop/rainDrop_002.svg",
+      "/breathscape-svg-assets/rainDrop/rainDrop_003.svg",
+      "/breathscape-svg-assets/rainDrop/rainDrop_004.svg",
+      "/breathscape-svg-assets/rainDrop/rainDrop_005.svg"
+    ],
+    "soilLine": [
+      "/breathscape-svg-assets/soilLine/soilLine_001.svg",
+      "/breathscape-svg-assets/soilLine/soilLine_002.svg",
+      "/breathscape-svg-assets/soilLine/soilLine_003.svg",
+      "/breathscape-svg-assets/soilLine/soilLine_004.svg",
+      "/breathscape-svg-assets/soilLine/soilLine_005.svg"
+    ],
+    "shadow": [
+      "/breathscape-svg-assets/shadow/shadow_001.svg",
+      "/breathscape-svg-assets/shadow/shadow_002.svg",
+      "/breathscape-svg-assets/shadow/shadow_003.svg",
+      "/breathscape-svg-assets/shadow/shadow_004.svg",
+      "/breathscape-svg-assets/shadow/shadow_005.svg"
+    ],
+    "flower": [
+      "/breathscape-svg-assets/flower/flower_001.svg",
+      "/breathscape-svg-assets/flower/flower_002.svg",
+      "/breathscape-svg-assets/flower/flower_003.svg",
+      "/breathscape-svg-assets/flower/flower_004.svg",
+      "/breathscape-svg-assets/flower/flower_005.svg"
+    ],
+    "firstFlower": [
+      "/breathscape-svg-assets/firstFlower/firstFlower_001.svg",
+      "/breathscape-svg-assets/firstFlower/firstFlower_002.svg",
+      "/breathscape-svg-assets/firstFlower/firstFlower_003.svg",
+      "/breathscape-svg-assets/firstFlower/firstFlower_004.svg",
+      "/breathscape-svg-assets/firstFlower/firstFlower_005.svg"
+    ],
+    "bud": [
+      "/breathscape-svg-assets/bud/bud_001.svg",
+      "/breathscape-svg-assets/bud/bud_002.svg",
+      "/breathscape-svg-assets/bud/bud_003.svg",
+      "/breathscape-svg-assets/bud/bud_004.svg",
+      "/breathscape-svg-assets/bud/bud_005.svg"
+    ],
+    "quietFlower": [
+      "/breathscape-svg-assets/quietFlower/quietFlower_001.svg",
+      "/breathscape-svg-assets/quietFlower/quietFlower_002.svg",
+      "/breathscape-svg-assets/quietFlower/quietFlower_003.svg",
+      "/breathscape-svg-assets/quietFlower/quietFlower_004.svg",
+      "/breathscape-svg-assets/quietFlower/quietFlower_005.svg"
+    ],
+    "cloud": [
+      "/breathscape-svg-assets/cloud/cloud_001.svg",
+      "/breathscape-svg-assets/cloud/cloud_002.svg",
+      "/breathscape-svg-assets/cloud/cloud_003.svg",
+      "/breathscape-svg-assets/cloud/cloud_004.svg",
+      "/breathscape-svg-assets/cloud/cloud_005.svg"
+    ],
+    "windLine": [
+      "/breathscape-svg-assets/windLine/windLine_001.svg",
+      "/breathscape-svg-assets/windLine/windLine_002.svg",
+      "/breathscape-svg-assets/windLine/windLine_003.svg",
+      "/breathscape-svg-assets/windLine/windLine_004.svg",
+      "/breathscape-svg-assets/windLine/windLine_005.svg"
+    ],
+    "softWind": [
+      "/breathscape-svg-assets/softWind/softWind_001.svg",
+      "/breathscape-svg-assets/softWind/softWind_002.svg",
+      "/breathscape-svg-assets/softWind/softWind_003.svg",
+      "/breathscape-svg-assets/softWind/softWind_004.svg",
+      "/breathscape-svg-assets/softWind/softWind_005.svg"
+    ],
+    "wind": [
+      "/breathscape-svg-assets/wind/wind_001.svg",
+      "/breathscape-svg-assets/wind/wind_002.svg",
+      "/breathscape-svg-assets/wind/wind_003.svg",
+      "/breathscape-svg-assets/wind/wind_004.svg",
+      "/breathscape-svg-assets/wind/wind_005.svg"
+    ],
+    "windBell": [
+      "/breathscape-svg-assets/windBell/windBell_001.svg",
+      "/breathscape-svg-assets/windBell/windBell_002.svg",
+      "/breathscape-svg-assets/windBell/windBell_003.svg",
+      "/breathscape-svg-assets/windBell/windBell_004.svg",
+      "/breathscape-svg-assets/windBell/windBell_005.svg"
+    ],
+    "ribbon": [
+      "/breathscape-svg-assets/ribbon/ribbon_001.svg",
+      "/breathscape-svg-assets/ribbon/ribbon_002.svg",
+      "/breathscape-svg-assets/ribbon/ribbon_003.svg",
+      "/breathscape-svg-assets/ribbon/ribbon_004.svg",
+      "/breathscape-svg-assets/ribbon/ribbon_005.svg"
+    ],
+    "floatingLeaf": [
+      "/breathscape-svg-assets/floatingLeaf/floatingLeaf_001.svg",
+      "/breathscape-svg-assets/floatingLeaf/floatingLeaf_002.svg",
+      "/breathscape-svg-assets/floatingLeaf/floatingLeaf_003.svg",
+      "/breathscape-svg-assets/floatingLeaf/floatingLeaf_004.svg",
+      "/breathscape-svg-assets/floatingLeaf/floatingLeaf_005.svg"
+    ],
+    "waterLine": [
+      "/breathscape-svg-assets/waterLine/waterLine_001.svg",
+      "/breathscape-svg-assets/waterLine/waterLine_002.svg",
+      "/breathscape-svg-assets/waterLine/waterLine_003.svg",
+      "/breathscape-svg-assets/waterLine/waterLine_004.svg",
+      "/breathscape-svg-assets/waterLine/waterLine_005.svg"
+    ],
+    "ripple": [
+      "/breathscape-svg-assets/ripple/ripple_001.svg",
+      "/breathscape-svg-assets/ripple/ripple_002.svg",
+      "/breathscape-svg-assets/ripple/ripple_003.svg",
+      "/breathscape-svg-assets/ripple/ripple_004.svg",
+      "/breathscape-svg-assets/ripple/ripple_005.svg"
+    ],
+    "puddle": [
+      "/breathscape-svg-assets/puddle/puddle_001.svg",
+      "/breathscape-svg-assets/puddle/puddle_002.svg",
+      "/breathscape-svg-assets/puddle/puddle_003.svg",
+      "/breathscape-svg-assets/puddle/puddle_004.svg",
+      "/breathscape-svg-assets/puddle/puddle_005.svg"
+    ],
+    "snailTrail": [
+      "/breathscape-svg-assets/snailTrail/snailTrail_001.svg",
+      "/breathscape-svg-assets/snailTrail/snailTrail_002.svg",
+      "/breathscape-svg-assets/snailTrail/snailTrail_003.svg",
+      "/breathscape-svg-assets/snailTrail/snailTrail_004.svg",
+      "/breathscape-svg-assets/snailTrail/snailTrail_005.svg"
+    ],
+    "leafBoat": [
+      "/breathscape-svg-assets/leafBoat/leafBoat_001.svg",
+      "/breathscape-svg-assets/leafBoat/leafBoat_002.svg",
+      "/breathscape-svg-assets/leafBoat/leafBoat_003.svg",
+      "/breathscape-svg-assets/leafBoat/leafBoat_004.svg",
+      "/breathscape-svg-assets/leafBoat/leafBoat_005.svg"
+    ],
+    "bridge": [
+      "/breathscape-svg-assets/bridge/bridge_001.svg",
+      "/breathscape-svg-assets/bridge/bridge_002.svg",
+      "/breathscape-svg-assets/bridge/bridge_003.svg",
+      "/breathscape-svg-assets/bridge/bridge_004.svg",
+      "/breathscape-svg-assets/bridge/bridge_005.svg"
+    ],
+    "signpost": [
+      "/breathscape-svg-assets/signpost/signpost_001.svg",
+      "/breathscape-svg-assets/signpost/signpost_002.svg",
+      "/breathscape-svg-assets/signpost/signpost_003.svg",
+      "/breathscape-svg-assets/signpost/signpost_004.svg",
+      "/breathscape-svg-assets/signpost/signpost_005.svg"
+    ],
+    "stone": [
+      "/breathscape-svg-assets/stone/stone_001.svg",
+      "/breathscape-svg-assets/stone/stone_002.svg",
+      "/breathscape-svg-assets/stone/stone_003.svg",
+      "/breathscape-svg-assets/stone/stone_004.svg",
+      "/breathscape-svg-assets/stone/stone_005.svg"
+    ],
+    "lantern": [
+      "/breathscape-svg-assets/lantern/lantern_001.svg",
+      "/breathscape-svg-assets/lantern/lantern_002.svg",
+      "/breathscape-svg-assets/lantern/lantern_003.svg",
+      "/breathscape-svg-assets/lantern/lantern_004.svg",
+      "/breathscape-svg-assets/lantern/lantern_005.svg"
+    ],
+    "windowLight": [
+      "/breathscape-svg-assets/windowLight/windowLight_001.svg",
+      "/breathscape-svg-assets/windowLight/windowLight_002.svg",
+      "/breathscape-svg-assets/windowLight/windowLight_003.svg",
+      "/breathscape-svg-assets/windowLight/windowLight_004.svg",
+      "/breathscape-svg-assets/windowLight/windowLight_005.svg"
+    ],
+    "firefly": [
+      "/breathscape-svg-assets/firefly/firefly_001.svg",
+      "/breathscape-svg-assets/firefly/firefly_002.svg",
+      "/breathscape-svg-assets/firefly/firefly_003.svg",
+      "/breathscape-svg-assets/firefly/firefly_004.svg",
+      "/breathscape-svg-assets/firefly/firefly_005.svg"
+    ],
+    "moon": [
+      "/breathscape-svg-assets/moon/moon_001.svg",
+      "/breathscape-svg-assets/moon/moon_002.svg",
+      "/breathscape-svg-assets/moon/moon_003.svg",
+      "/breathscape-svg-assets/moon/moon_004.svg",
+      "/breathscape-svg-assets/moon/moon_005.svg"
+    ],
+    "star": [
+      "/breathscape-svg-assets/star/star_001.svg",
+      "/breathscape-svg-assets/star/star_002.svg",
+      "/breathscape-svg-assets/star/star_003.svg",
+      "/breathscape-svg-assets/star/star_004.svg",
+      "/breathscape-svg-assets/star/star_005.svg"
+    ],
+    "constellationLine": [
+      "/breathscape-svg-assets/constellationLine/constellationLine_001.svg",
+      "/breathscape-svg-assets/constellationLine/constellationLine_002.svg",
+      "/breathscape-svg-assets/constellationLine/constellationLine_003.svg",
+      "/breathscape-svg-assets/constellationLine/constellationLine_004.svg",
+      "/breathscape-svg-assets/constellationLine/constellationLine_005.svg"
+    ],
+    "mushroom": [
+      "/breathscape-svg-assets/mushroom/mushroom_001.svg",
+      "/breathscape-svg-assets/mushroom/mushroom_002.svg",
+      "/breathscape-svg-assets/mushroom/mushroom_003.svg",
+      "/breathscape-svg-assets/mushroom/mushroom_004.svg",
+      "/breathscape-svg-assets/mushroom/mushroom_005.svg"
+    ],
+    "rainbow": [
+      "/breathscape-svg-assets/rainbow/rainbow_001.svg",
+      "/breathscape-svg-assets/rainbow/rainbow_002.svg",
+      "/breathscape-svg-assets/rainbow/rainbow_003.svg",
+      "/breathscape-svg-assets/rainbow/rainbow_004.svg",
+      "/breathscape-svg-assets/rainbow/rainbow_005.svg"
+    ]
+  }
+}

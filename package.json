@@ -15,6 +15,7 @@
     "quickdraw:cache": "python scripts/buildQuickDrawRasterCache.py --input=quickdraw_selected --cache-dir=quickdraw_cache --size=64 --limit=3650 --workers=6",
     "quickdraw:train": "node scripts/trainQuickDrawSketchModel.mjs --input=quickdraw_selected --out=public/quickdraw-model --max-per-category=500 --epochs=18 --grid=16",
     "quickdraw:train:cnn": "python scripts/trainQuickDrawTorchCnn.py --input=quickdraw_selected --out=public/quickdraw-cnn --max-per-category=3000 --validation-per-category=650 --epochs=24 --size=64 --batch-size=96 --architecture=resnet --lr=0.00045 --target=tool --cache-dir=quickdraw_cache",
+    "breathscape:assets": "node scripts/generateBreathScapeElementSvgs.mjs",
     "preview": "vite preview --host 0.0.0.0"
   },
   "dependencies": {

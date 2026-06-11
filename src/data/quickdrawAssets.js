@@ -29,19 +29,73 @@ const selectedCategories = new Set([
   'windmill',
 ]);
 
+const breathscapeAssetTools = new Set([
+  'seed',
+  'memorySeed',
+  'garden',
+  'grass',
+  'reed',
+  'sprout',
+  'moss',
+  'smallTree',
+  'sunlight',
+  'sun',
+  'breathLight',
+  'moonbeam',
+  'dew',
+  'rain',
+  'rainDrop',
+  'soilLine',
+  'shadow',
+  'flower',
+  'firstFlower',
+  'bud',
+  'quietFlower',
+  'cloud',
+  'windLine',
+  'softWind',
+  'wind',
+  'windBell',
+  'ribbon',
+  'floatingLeaf',
+  'waterLine',
+  'ripple',
+  'puddle',
+  'snailTrail',
+  'leafBoat',
+  'bridge',
+  'signpost',
+  'stone',
+  'lantern',
+  'windowLight',
+  'firefly',
+  'moon',
+  'star',
+  'constellationLine',
+  'mushroom',
+  'rainbow',
+]);
+
 export const quickdrawAssets = Object.fromEntries(
   toolIds.map((toolId) => {
     const tool = getToolElement(toolId);
+    const breathscapePaths = buildBreathScapeAssetPaths(toolId);
     const selectedPaths = buildSelectedAssetPaths(tool);
+    const preferredPaths = breathscapePaths.length ? breathscapePaths : selectedPaths;
     return [
       toolId,
       {
         ...tool,
-        toolbarGlyph: withAssetPath(getToolbarGlyph(toolId), selectedPaths[0]),
-        assetVariants: buildAssetVariants(getAssetVariants(toolId), selectedPaths),
-        publicAssetBase: `/quickdraw-assets/${toolId}`,
+        toolbarGlyph: withAssetPath(getToolbarGlyph(toolId), preferredPaths[0]),
+        assetVariants: buildAssetVariants(getAssetVariants(toolId), preferredPaths),
+        publicAssetBase: breathscapePaths.length ? `/breathscape-svg-assets/${toolId}` : `/quickdraw-assets/${toolId}`,
+        breathscapeAssetPaths: breathscapePaths,
         selectedAssetPaths: selectedPaths,
-        source: selectedPaths.length ? 'quickdraw-selected-svg' : 'missing-quickdraw-selected-svg',
+        source: breathscapePaths.length
+          ? 'breathscape-generated-svg'
+          : selectedPaths.length
+            ? 'quickdraw-selected-svg'
+            : 'missing-quickdraw-selected-svg',
       },
     ];
   }),
@@ -59,7 +113,7 @@ export function getQuickDrawAssetVariant(toolId, variantIndex = 0) {
 }
 
 export function getQuickDrawAssetUrl(toolId, variantIndex = 0) {
-  return `${getQuickDrawAsset(toolId).publicAssetBase}/${(variantIndex % 3) + 1}.svg`;
+  return getQuickDrawAssetVariant(toolId, variantIndex)?.assetPath || null;
 }
 
 export function serializeQuickDrawAsset(toolId, variantIndex = 0, stroke = '#4f5e74') {
@@ -79,6 +133,14 @@ function buildSelectedAssetPaths(tool) {
     }
   });
   return [...new Set(selected)].slice(0, 30);
+}
+
+function buildBreathScapeAssetPaths(toolId) {
+  if (!breathscapeAssetTools.has(toolId)) return [];
+  return Array.from({ length: 5 }, (_, index) => {
+    const fileIndex = String(index + 1).padStart(3, '0');
+    return `/breathscape-svg-assets/${toolId}/${toolId}_${fileIndex}.svg`;
+  });
 }
 
 function buildAssetVariants(ruleVariants, selectedPaths) {

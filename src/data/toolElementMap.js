@@ -349,6 +349,23 @@ Object.assign(toolElementMap, {
     label: '路牌',
     feedbackText: '现在画出来的都会变成路牌，小路方向更清楚。',
   }),
+  stone: aliasTool('stone', 'bridge', {
+    categories: ['circle'],
+    label: '石头',
+    toolbarGlyph: glyphFromPaths([circlePath(128, 138, 44, 0.18), circlePath(106, 132, 18, 0.12), circlePath(152, 146, 16, 0.1)]),
+    assetVariants: buildVariants('stone', [
+      [circlePath(128, 138, 44, 0.18), circlePath(106, 132, 18, 0.12), circlePath(152, 146, 16, 0.1)],
+      [circlePath(126, 140, 42, 0.14), circlePath(148, 132, 17, 0.12)],
+      [circlePath(130, 136, 46, 0.16), circlePath(110, 144, 15, 0.12)],
+    ]),
+    placementRule: 'spanGroundGap',
+    maxCountPerStroke: 3,
+    stateEffect: { pathCompletion: 0.08, calmLevel: 0.03 },
+    soundEffect: 'soil',
+    feedbackText: '现在画出来的都会变成石头，小路会更连起来。',
+    allowedZones: commonPlacement.ground,
+    fallbackIfWrongZone: 'ground',
+  }),
   shadow: aliasTool('shadow', 'soilLine', {
     label: '柔影',
     feedbackText: '现在画出来的都会变成柔影，角落会更安静。',

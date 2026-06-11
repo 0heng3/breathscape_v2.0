@@ -1,4 +1,5 @@
 import React from 'react';
+import ElementSvgIcon from './ElementSvgIcon';
 
 function MoodCard({ mood, entry, selected, onSelect }) {
   const card = entry || mood;
@@ -6,12 +7,18 @@ function MoodCard({ mood, entry, selected, onSelect }) {
   return (
     <button className={`mood-card scene-card ${selected ? 'selected' : ''}`} onClick={() => onSelect(card.id)}>
       <span className={`scene-card__visual ${card.visual}`} style={{ '--tool-color': entry?.tool?.color }} aria-hidden="true">
-        <span />
-        <span />
-        <span />
-        <span />
-        <span />
-        <span />
+        {entry?.tool?.id ? (
+          <ElementSvgIcon toolId={entry.tool.id} size={42} />
+        ) : (
+          <>
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+            <span />
+          </>
+        )}
       </span>
       <span className="mood-card__label">{card.title}</span>
       <small>{card.childText}</small>

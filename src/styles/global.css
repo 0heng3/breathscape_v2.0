@@ -323,14 +323,27 @@ button:disabled {
 
 .day-chip__icon {
   position: relative;
-  display: block;
+  display: grid;
   width: 42px;
   height: 30px;
+  place-items: center;
 }
 
 .day-chip__icon i {
   position: absolute;
   display: block;
+}
+
+.day-chip__icon .external-svg-glyph {
+  width: 34px;
+  height: 30px;
+}
+
+.day-chip__icon .external-svg-glyph svg {
+  position: static;
+  display: block;
+  color: currentColor;
+  filter: drop-shadow(0 5px 7px rgba(80, 64, 120, 0.14));
 }
 
 .garden-day-selector__buttons small {
@@ -698,6 +711,23 @@ button:disabled {
   top: 8px;
   z-index: 2;
   color: var(--tool-color, var(--violet));
+}
+
+.scene-card__visual .external-svg-glyph {
+  position: absolute;
+  inset: 3px 10px;
+  display: grid;
+  place-items: center;
+  color: var(--tool-color, var(--violet));
+}
+
+.scene-card__visual .external-svg-glyph svg {
+  position: static;
+  left: auto;
+  top: auto;
+  width: 42px;
+  height: 42px;
+  filter: drop-shadow(0 8px 12px color-mix(in srgb, currentColor 18%, transparent));
 }
 
 .tool-entry {

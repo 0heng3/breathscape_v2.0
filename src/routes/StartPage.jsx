@@ -1,5 +1,6 @@
 import { BookOpen, Play } from 'lucide-react';
 import React from 'react';
+import ElementSvgIcon from '../components/ElementSvgIcon';
 import GardenStage from '../components/GardenStage';
 import SoftButton from '../components/SoftButton';
 import { gardenDays } from '../data/gardenDays';
@@ -34,9 +35,7 @@ function StartPage({ mood, selectedDay = 1, onSelectDay, onStart, onOpenDiary })
               >
                 <span className="day-chip__number">{day.day}</span>
                 <span className="day-chip__icon" aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
+                  <ElementSvgIcon toolId={getDayIconTool(day.day)} size={32} />
                 </span>
                 <small>{day.name}</small>
               </button>
@@ -57,6 +56,18 @@ function StartPage({ mood, selectedDay = 1, onSelectDay, onStart, onOpenDiary })
       </div>
     </section>
   );
+}
+
+function getDayIconTool(day) {
+  return {
+    1: 'seed',
+    2: 'waterLine',
+    3: 'windLine',
+    4: 'stone',
+    5: 'mushroom',
+    6: 'lantern',
+    7: 'star',
+  }[day] || 'seed';
 }
 
 export default StartPage;
