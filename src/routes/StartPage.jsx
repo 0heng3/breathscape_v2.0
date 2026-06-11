@@ -4,6 +4,7 @@ import ElementSvgIcon from '../components/ElementSvgIcon';
 import GardenStage from '../components/GardenStage';
 import SoftButton from '../components/SoftButton';
 import { gardenDays } from '../data/gardenDays';
+import { getTool } from '../data/tools';
 import { createInitialSceneState } from '../utils/sceneState';
 
 function StartPage({ mood, selectedDay = 1, onSelectDay, onStart, onOpenDiary }) {
@@ -25,20 +26,7 @@ function StartPage({ mood, selectedDay = 1, onSelectDay, onStart, onOpenDiary })
           </div>
           <div className="garden-day-selector__buttons">
             {gardenDays.map((day) => (
-              <button
-                type="button"
-                className={`day-chip day-chip-${day.day} ${selectedDay === day.day ? 'active' : ''}`}
-                onClick={() => onSelectDay?.(day.day)}
-                aria-label={`第 ${day.day} 天，${day.name}`}
-                title={day.name}
-                key={day.day}
-              >
-                <span className="day-chip__number">{day.day}</span>
-                <span className="day-chip__icon" aria-hidden="true">
-                  <ElementSvgIcon toolId={getDayIconTool(day.day)} size={32} />
-                </span>
-                <small>{day.name}</small>
-              </button>
+              <DayChip day={day} selected={selectedDay === day.day} onSelect={onSelectDay} key={day.day} />
             ))}
           </div>
         </div>
@@ -55,6 +43,28 @@ function StartPage({ mood, selectedDay = 1, onSelectDay, onStart, onOpenDiary })
         </div>
       </div>
     </section>
+  );
+}
+
+function DayChip({ day, selected, onSelect }) {
+  const toolId = getDayIconTool(day.day);
+  const tool = getTool(toolId);
+
+  return (
+    <button
+      type="button"
+      className={`day-chip day-chip-${day.day} ${selected ? 'active' : ''}`}
+      style={{ '--tool-color': tool.color, color: tool.color }}
+      onClick={() => onSelect?.(day.day)}
+      aria-label={`第 ${day.day} 天，${day.name}`}
+      title={day.name}
+    >
+      <span className="day-chip__number">{day.day}</span>
+      <span className="day-chip__icon" aria-hidden="true">
+        <ElementSvgIcon toolId={toolId} size={38} />
+      </span>
+      <small>{day.name}</small>
+    </button>
   );
 }
 

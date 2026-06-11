@@ -22,6 +22,7 @@ export const initialSceneState = {
   pathCompletion: 0,
   nightSparkle: 0,
   localWarmth: 0,
+  companionLight: 0,
   memoryConnection: 0,
   visualClutter: 0,
   calmLevel: 0.2,
@@ -255,28 +256,33 @@ export function applyGestureSettling(state, gesture) {
   const wind = clamp(gesture.wind || 0, -1, 1);
   const windAmount = Math.abs(wind);
   const confirmed = Boolean(gesture.confirmed);
+  const manualBoost = Boolean(gesture.manualBoost);
   const action = gesture.action || state.gestureAction || 'still_stand';
   const pulseTarget = confirmed ? 1 : 0;
+  const boost = manualBoost ? 3.2 : 1;
   const actionBoosts = {
-    cup_light: { light: 0.032, bright: 0.018, hold: 0.012, wind: 0 },
-    raise_soft: { light: 0.026, bright: 0.014, hold: 0.006, wind: 0.004 },
-    one_hand_wind: { light: 0.004, bright: 0.004, hold: 0.002, wind: 0.08 },
-    still_stand: { light: 0.006, bright: 0.003, hold: 0.028, wind: -0.018 },
+    cup_light: { light: 0.064, bright: 0.036, hold: 0.018, wind: 0 },
+    raise_soft: { light: 0.052, bright: 0.03, hold: 0.01, wind: 0.008 },
+    one_hand_wind: { light: 0.008, bright: 0.008, hold: 0.004, wind: 0.16 },
+    still_stand: { light: 0.012, bright: 0.006, hold: 0.046, wind: -0.034 },
   }[action] || { light: 0.01, bright: 0.004, hold: 0.01, wind: 0 };
 
   return {
     ...state,
-    windEnergy: clamp(state.windEnergy * (0.976 + Math.min(0, actionBoosts.wind)) + windAmount * (0.022 + Math.max(0, actionBoosts.wind)), 0, 1),
+    windEnergy: clamp(state.windEnergy * (0.972 + Math.min(0, actionBoosts.wind)) + windAmount * (0.05 + Math.max(0, actionBoosts.wind) * boost), 0, 1),
     rainDensity: clamp(state.rainDensity * (0.988 - hold * 0.04), 0, 1),
-    sunlightWarmth: clamp(state.sunlightWarmth + glow * actionBoosts.light + hold * 0.009, 0, 1),
-    brightness: clamp(state.brightness + glow * actionBoosts.bright, 0.65, 0.96),
-    calmLevel: clamp(state.calmLevel + hold * (0.016 + actionBoosts.hold) + slow * 0.012 + glow * 0.012, 0, 1),
+    sunlightWarmth: clamp(state.sunlightWarmth + glow * actionBoosts.light * boost + hold * 0.009, 0, 1),
+    localWarmth: clamp((state.localWarmth || 0) + (action === 'cup_light' ? glow * 0.055 * boost : 0), 0, 1),
+    companionLight: clamp((state.companionLight || 0) + (action === 'cup_light' ? glow * 0.06 * boost : 0), 0, 1),
+    brightness: clamp(state.brightness + glow * actionBoosts.bright * boost, 0.65, 0.96),
+    fogOpacity: clamp((state.fogOpacity || 0) - (action === 'cup_light' || action === 'raise_soft' ? glow * 0.018 * boost : 0), 0, 0.35),
+    calmLevel: clamp(state.calmLevel + hold * (0.016 + actionBoosts.hold) + slow * 0.012 + glow * 0.012 * boost, 0, 1),
     soundIntensity: clamp(state.soundIntensity * (0.988 - hold * 0.026), 0.04, 0.34),
-    animationSpeed: clamp((state.animationSpeed || 1) * 0.86 + (1 - hold * 0.24 - slow * 0.12 + windAmount * 0.16) * 0.14, 0.58, 1.12),
-    gestureWind: clamp((state.gestureWind || 0) * 0.78 + wind * 0.22, -1, 1),
-    gestureGlow: clamp((state.gestureGlow || 0) * 0.8 + glow * 0.2, 0, 1),
-    gestureHold: clamp((state.gestureHold || 0) * 0.82 + hold * 0.18, 0, 1),
-    gesturePulse: clamp((state.gesturePulse || 0) * 0.84 + pulseTarget * 0.28, 0, 1),
+    animationSpeed: clamp((state.animationSpeed || 1) * 0.86 + (1 - hold * 0.24 - slow * 0.12 + windAmount * 0.16 * boost) * 0.14, 0.58, 1.12),
+    gestureWind: clamp((state.gestureWind || 0) * 0.52 + wind * (manualBoost ? 0.72 : 0.32), -1, 1),
+    gestureGlow: clamp((state.gestureGlow || 0) * 0.52 + glow * (manualBoost ? 0.78 : 0.32), 0, 1),
+    gestureHold: clamp((state.gestureHold || 0) * 0.62 + hold * (manualBoost ? 0.58 : 0.28), 0, 1),
+    gesturePulse: clamp((state.gesturePulse || 0) * 0.52 + pulseTarget * (manualBoost ? 0.9 : 0.46), 0, 1),
     gestureAction: action,
   };
 }
@@ -303,15 +309,18 @@ export function createFeedback(tool, nextState, recentTools = []) {
   return lines[family]?.[Math.min(lines[family].length - 1, count - 1)] || '花园接住了这一笔。';
 }
 
-export function getSceneClues(state) {
+export function getSceneClues(state, options = {}) {
+  const hasDrawing = !options.onlyAfterDrawing || (state.totalStrokeCount || 0) > 0;
+  if (!hasDrawing) return ['不用画得很像，花园听得懂你的线条'];
+  const family = getToolFamily(state.lastTool);
   const clues = [];
-  if (state.soilWetness > 0.08) clues.push('土地喝到水了');
-  if (state.grassCoverage > 0.05) clues.push('这里长出绿色');
-  if (state.flowerBloom > 0.05) clues.push('花苞打开一点');
-  if (state.sunlightWarmth > 0.08) clues.push('小灯亮了一点');
-  if (state.windEnergy > 0.12) clues.push('云在慢慢移动');
-  if ((state.pathCompletion || 0) > 0.18) clues.push('小路更完整');
-  if ((state.memoryConnection || 0) > 0.18) clues.push('星光连起来');
+  if (family === 'rain') clues.push('土地和水面收到水了');
+  if (family === 'grass') clues.push('地面长出一点绿色');
+  if (family === 'flower') clues.push('花在这里打开一点');
+  if (family === 'sun') clues.push('花园亮了一点');
+  if (family === 'wind') clues.push('云和草慢慢动起来');
+  if (family === 'stone') clues.push('小路更完整');
+  if (family === 'memory') clues.push('星光轻轻连起来');
   if (state.visualClutter > 0.55) clues.push('可以留一点空白');
   return clues.length ? clues.slice(0, 4) : ['不用画得很像，花园听得懂你的线条'];
 }

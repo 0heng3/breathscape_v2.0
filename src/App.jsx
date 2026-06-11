@@ -150,8 +150,8 @@ function App() {
     const nextDay = getGardenDay(day);
     setSelectedScene(null);
     setSelectedDay(day);
-    setSelectedTool(nextDay.tools[0] || 'seed');
-    selectedToolRef.current = nextDay.tools[0] || 'seed';
+    setSelectedTool(null);
+    selectedToolRef.current = null;
     setEntryTool(null);
     setStrokes([]);
     setElementHistory([]);
@@ -438,10 +438,23 @@ function App() {
   }
 
   function suggestLight() {
-    const lightTool = gardenDay.tools.find((tool) => ['sun', 'sunlight', 'lantern', 'moon', 'star', 'breathLight', 'windowLight', 'moonbeam', 'firefly'].includes(tool)) || 'sunlight';
-    selectedToolRef.current = lightTool;
-    setSelectedTool(lightTool);
-    setFeedback('也可以给花园一点柔和的光。');
+    setSceneState((current) => {
+      const nextState = {
+        ...current,
+        sunlightWarmth: Math.min(1, (current.sunlightWarmth || 0) + 0.18),
+        localWarmth: Math.min(1, (current.localWarmth || 0) + 0.18),
+        companionLight: Math.min(1, (current.companionLight || 0) + 0.22),
+        brightness: Math.min(0.96, (current.brightness || 0.72) + 0.06),
+        fogOpacity: Math.max(0, (current.fogOpacity || 0) - 0.06),
+        calmLevel: Math.min(1, (current.calmLevel || 0) + 0.04),
+        gestureGlow: Math.min(1, Math.max(current.gestureGlow || 0, 0.88)),
+        gesturePulse: Math.min(1, Math.max(current.gesturePulse || 0, 0.92)),
+        gestureAction: 'cup_light',
+      };
+      sceneStateRef.current = nextState;
+      return nextState;
+    });
+    setFeedback('小灯亮了一点，也可以继续自由画。');
   }
 
   function saveDiary() {
@@ -534,7 +547,21 @@ function App() {
           <StartPage mood={mood} selectedDay={selectedDay} onSelectDay={chooseDay} onStart={startGarden} onOpenDiary={() => navigate('/diary-list')} />
         )}
         {route === '/mood-scene' && (
-          <MoodPage selectedMood={selectedScene} selectedToolId={selectedTool} gardenDay={gardenDay} onSelectMood={chooseScene} onContinue={() => navigate('/guide')} />
+          <MoodPage
+            selectedMood={selectedScene}
+            selectedToolId={selectedTool}
+            gardenDay={gardenDay}
+            onSelectMood={chooseScene}
+            onContinue={() => {
+              if (!selectedScene) {
+                setSelectedScene('color_path');
+                setEntryTool(null);
+                selectedToolRef.current = null;
+                setSelectedTool(null);
+              }
+              navigate('/guide');
+            }}
+          />
         )}
         {route === '/guide' && (
           <GuidePage

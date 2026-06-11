@@ -1,6 +1,5 @@
 import React from 'react';
 import { initialSceneState } from '../utils/sceneState';
-import QuickDrawElementLayer from './QuickDrawElementLayer';
 
 function GardenStage({
   mood,
@@ -47,6 +46,7 @@ function GardenStage({
         '--path-level': pathLevel,
         '--memory-level': memoryLevel,
         '--night-sparkle': nightSparkle,
+        '--companion-light': sceneState.companionLight || 0,
         '--drawn-wind-dir': windVisual.direction,
         '--plant-wind-angle': windVisual.angle,
         '--plant-wind-angle-mid': windVisual.midAngle,
@@ -84,9 +84,8 @@ function GardenStage({
       )}
       <div className="soil-wetness" />
       <span className="gesture-wind-ribbon" />
-      <QuickDrawElementLayer items={[...elementHistory, ...liveResponses].filter((item) => item.assetPath)} sceneState={sceneState} />
       <div className="breathscape-element-layer" aria-hidden="true">
-        {[...elementHistory, ...liveResponses].filter((item) => !item.assetPath).map((item, index) => (
+        {[...elementHistory, ...liveResponses].map((item, index) => (
           <ResponseCluster item={item} index={index} live={Boolean(item.live)} key={item.id || `${item.tool}-${index}`} />
         ))}
       </div>

@@ -293,12 +293,12 @@ button:disabled {
 .garden-day-selector__buttons button {
   position: relative;
   display: grid;
-  grid-template-rows: 18px 30px auto;
+  grid-template-rows: 18px 42px auto;
   width: 100%;
   min-height: 78px;
   min-width: 0;
   place-items: center;
-  gap: 3px;
+  gap: 2px;
   border: 0;
   border-radius: 24px;
   color: var(--violet-deep);
@@ -324,8 +324,8 @@ button:disabled {
 .day-chip__icon {
   position: relative;
   display: grid;
-  width: 42px;
-  height: 30px;
+  width: 54px;
+  height: 42px;
   place-items: center;
 }
 
@@ -335,14 +335,16 @@ button:disabled {
 }
 
 .day-chip__icon .external-svg-glyph {
-  width: 34px;
-  height: 30px;
+  width: 46px;
+  height: 40px;
 }
 
 .day-chip__icon .external-svg-glyph svg {
   position: static;
   display: block;
   color: currentColor;
+  width: 38px;
+  height: 38px;
   filter: drop-shadow(0 5px 7px rgba(80, 64, 120, 0.14));
 }
 
@@ -650,11 +652,11 @@ button:disabled {
 
 .mood-card {
   display: grid;
-  grid-template-rows: 54px auto minmax(32px, auto);
+  grid-template-rows: 58px 24px minmax(28px, auto);
   min-height: 132px;
   align-items: center;
   justify-items: center;
-  gap: 7px;
+  gap: 5px;
   padding: 12px 12px 11px;
   border: 0;
   border-radius: 24px;
@@ -694,9 +696,10 @@ button:disabled {
 
 .scene-card__visual {
   position: relative;
-  display: block;
+  display: grid;
   width: 70px;
-  height: 50px;
+  height: 54px;
+  place-items: center;
   overflow: hidden;
   contain: paint;
 }
@@ -715,9 +718,10 @@ button:disabled {
 }
 
 .scene-card__visual .external-svg-glyph {
-  position: absolute;
-  inset: 3px 10px;
+  position: static;
   display: grid;
+  width: 54px;
+  height: 54px;
   place-items: center;
   color: var(--tool-color, var(--violet));
 }
@@ -726,8 +730,13 @@ button:disabled {
   position: static;
   left: auto;
   top: auto;
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
+}
+
+.scene-card__visual--tool {
+  display: grid;
+  place-items: center;
 }
 
 .tool-entry {
@@ -1836,8 +1845,8 @@ button:disabled {
 
 .lamp-warm .lamp-aura,
 .lamp-quiet .lamp-aura {
-  background: rgba(247, 201, 72, calc(0.16 + var(--gesture-glow) * 0.1));
-  box-shadow: 0 0 calc(50px + var(--gesture-glow) * 28px) rgba(247, 201, 72, 0.28);
+  background: rgba(247, 201, 72, calc(0.18 + var(--gesture-glow) * 0.18));
+  box-shadow: 0 0 calc(54px + var(--gesture-glow) * 58px) rgba(247, 201, 72, 0.38);
 }
 
 .seed-idle {
@@ -2387,13 +2396,45 @@ button:disabled {
   top: 49%;
   z-index: 23;
   height: 14%;
-  opacity: calc(var(--gesture-wind-abs) * 0.5 + var(--gesture-pulse) * var(--gesture-wind-abs) * 0.28);
-  border-top: 7px solid rgba(142, 197, 232, 0.26);
-  border-bottom: 5px solid rgba(142, 197, 232, 0.12);
+  opacity: calc(var(--gesture-wind-abs) * 0.68 + var(--gesture-pulse) * var(--gesture-wind-abs) * 0.4);
+  border-top: 8px solid rgba(142, 197, 232, 0.34);
+  border-bottom: 6px solid rgba(142, 197, 232, 0.18);
   border-radius: 50%;
   filter: blur(1.2px);
-  transform: translateX(calc(var(--gesture-wind) * 36px)) rotate(calc(var(--gesture-wind) * -5deg)) scaleX(calc(1 + var(--gesture-wind-abs) * 0.18));
+  transform: translateX(calc(var(--gesture-wind) * 58px)) rotate(calc(var(--gesture-wind) * -7deg)) scaleX(calc(1 + var(--gesture-wind-abs) * 0.28));
   transition: opacity 420ms ease, transform 520ms ease;
+}
+
+.calm.gesture-cup_light .sky-wash {
+  background:
+    radial-gradient(circle at 70% 18%, rgba(255, 225, 126, calc(0.28 + var(--gesture-light) * 0.42)), transparent 22%),
+    radial-gradient(circle at 58% 58%, rgba(255, 204, 118, calc(0.12 + var(--gesture-light) * 0.26)), transparent 42%),
+    linear-gradient(180deg, rgba(159, 206, 235, 0.38), rgba(255, 246, 218, 0.22));
+}
+
+.calm.gesture-cup_light .lamp-aura {
+  opacity: calc(0.44 + var(--gesture-light) * 0.56);
+  transform: scale(calc(1.04 + var(--gesture-light) * 0.34));
+  filter: blur(0.2px) brightness(calc(1.08 + var(--gesture-light) * 0.22));
+}
+
+.calm.gesture-raise_soft .sky-wash {
+  filter: brightness(calc(1 + var(--gesture-lift) * 0.16)) saturate(calc(1 + var(--gesture-lift) * 0.08));
+}
+
+.calm.gesture-raise_soft .breathscape-element-layer {
+  transform: translateY(calc(var(--gesture-lift) * -10px));
+  transition: transform 520ms ease;
+}
+
+.calm.gesture-one_hand_wind .gesture-wind-ribbon {
+  opacity: calc(0.2 + var(--gesture-wind-abs) * 0.86 + var(--gesture-pulse) * 0.28);
+  transform: translateX(calc(var(--gesture-wind) * 86px)) rotate(calc(var(--gesture-wind) * -10deg)) scaleX(calc(1.08 + var(--gesture-wind-abs) * 0.36));
+}
+
+.calm.gesture-still_stand .sky-wash,
+.calm.gesture-still_stand .breathscape-element-layer {
+  filter: saturate(calc(0.96 + var(--gesture-hold) * 0.04)) brightness(calc(0.98 + var(--gesture-hold) * 0.04));
 }
 
 .gesture-light-bloom {
@@ -5573,6 +5614,7 @@ button:disabled {
 
 .feedback-panel__lamp {
   gap: 12px;
+  display: flex;
 }
 
 .lamp-face {
@@ -5584,8 +5626,13 @@ button:disabled {
   background:
     radial-gradient(circle at 36% 58%, #8f7ca7 0 2px, transparent 3px),
     radial-gradient(circle at 66% 58%, #8f7ca7 0 2px, transparent 3px),
-    linear-gradient(180deg, #fff2a8 0%, #f8d976 70%, #e4be55 100%);
-  box-shadow: 0 12px 22px rgba(235, 190, 78, 0.28);
+    linear-gradient(180deg, #fff2a8 0%, rgba(248, 217, 118, calc(0.72 + var(--companion-light) * 0.22)) 70%, #e4be55 100%);
+  box-shadow:
+    0 12px 22px rgba(235, 190, 78, calc(0.24 + var(--companion-light) * 0.16)),
+    0 0 calc(8px + var(--companion-light) * 26px) rgba(247, 201, 72, calc(0.12 + var(--companion-light) * 0.24));
+  filter: brightness(calc(1 + var(--companion-light) * 0.12));
+  transform: scale(calc(1 + var(--companion-light) * 0.035));
+  transition: box-shadow 360ms ease, filter 360ms ease, transform 360ms ease;
 }
 
 .lamp-face::before {
@@ -5909,7 +5956,8 @@ button:disabled {
 }
 
 .canvas-page .feedback-panel__lamp {
-  display: none;
+  display: flex;
+  padding: 6px 2px 2px;
 }
 
 .canvas-page .active-tool-label {

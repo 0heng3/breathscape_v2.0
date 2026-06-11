@@ -7,13 +7,13 @@ import { getSceneClues } from '../utils/sceneState';
 function FeedbackPanel({ feedback, sceneState, activeTool, selectedToolId, toolTip, recognitionProcess, canFinish, onFinish, onSuggest }) {
   const freeDrawing = !selectedToolId;
   const tool = freeDrawing ? null : getToolElement(activeTool.id);
-  const clues = getSceneClues(sceneState);
+  const clues = getSceneClues(sceneState, { onlyAfterDrawing: true });
   const sceneLine = freeDrawing ? '按笔触方向回应。' : getToolSceneLine(activeTool.id);
   const label = freeDrawing ? '自由画' : (tool.label || activeTool.label);
 
   return (
     <aside className="feedback-panel">
-      <div className="lamp-dialogue compact feedback-panel__lamp">
+      <div className="lamp-dialogue compact feedback-panel__lamp" style={{ '--companion-light': sceneState.companionLight || 0 }}>
         <span className="lamp-face" aria-hidden="true">
           <span />
         </span>
@@ -67,7 +67,7 @@ function RecognitionProcessCard({ process = {} }) {
         {process.rasterPreviewUrl ? (
           <img src={process.rasterPreviewUrl} alt="64x64 灰度栅格预览" />
         ) : (
-          <span>64x64</span>
+          <span aria-hidden="true" />
         )}
       </div>
       <div className="recognition-process__steps">

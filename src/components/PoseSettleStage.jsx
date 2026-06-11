@@ -9,10 +9,10 @@ const POSE_MODEL_CANDIDATES = [
 ];
 const HAND_MODEL_URL =
   'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
-const DETECT_INTERVAL_MS = 86;
-const EMIT_INTERVAL_MS = 160;
-const UI_INTERVAL_MS = 220;
-const GESTURE_LOCK_MS = 320;
+const DETECT_INTERVAL_MS = 66;
+const EMIT_INTERVAL_MS = 120;
+const UI_INTERVAL_MS = 160;
+const GESTURE_LOCK_MS = 220;
 
 const GUIDES = [
   {
@@ -64,6 +64,7 @@ function PoseSettleStage({ children, onGesture, cameraDockTargetId = null }) {
   const lastEmitRef = useRef(0);
   const stableRef = useRef({ id: 'none', since: 0, count: 0 });
   const smoothedRef = useRef({ glow: 0.08, hold: 0.18, slow: 0.55, wind: 0 });
+  const guideEmitTimersRef = useRef([]);
 
   const [cameraState, setCameraState] = useState('idle');
   const [modelLabel, setModelLabel] = useState('手部+姿势');
@@ -79,6 +80,8 @@ function PoseSettleStage({ children, onGesture, cameraDockTargetId = null }) {
   useEffect(() => {
     return () => {
       cancelAnimationFrame(frameRef.current);
+      guideEmitTimersRef.current.forEach((timerId) => window.clearTimeout(timerId));
+      guideEmitTimersRef.current = [];
       streamRef.current?.getTracks().forEach((track) => track.stop());
       poseLandmarkerRef.current?.close?.();
       handLandmarkerRef.current?.close?.();
@@ -217,7 +220,10 @@ function PoseSettleStage({ children, onGesture, cameraDockTargetId = null }) {
                   <button
                     className={item.id === guide.id ? 'active' : ''}
                     type="button"
-                    onClick={() => setGuideIndex(index)}
+                    onClick={() => {
+                      setGuideIndex(index);
+                      emitGuideGesture(item.id, true);
+                    }}
                     key={item.id}
                   >
                     <span>{item.title}</span>
@@ -262,7 +268,10 @@ function PoseSettleStage({ children, onGesture, cameraDockTargetId = null }) {
                   <button
                     className={item.id === guide.id ? 'active' : ''}
                     type="button"
-                    onClick={() => setGuideIndex(index)}
+                    onClick={() => {
+                      setGuideIndex(index);
+                      emitGuideGesture(item.id, true);
+                    }}
                     key={item.id}
                   >
                     <span>{item.title}</span>
@@ -293,6 +302,37 @@ function PoseSettleStage({ children, onGesture, cameraDockTargetId = null }) {
       <div className="pose-garden-frame">{children}</div>
     </div>
   );
+
+  function emitGuideGesture(id, confirmed = false) {
+    const preset = createGesturePreset(id, { wind: id === 'one_hand_wind' ? 0.8 : 0 });
+    const gesture = {
+      ...preset.values,
+      action: id,
+      confirmed,
+      confidence: confirmed ? 1 : 0.62,
+      manualBoost: confirmed,
+    };
+    smoothedRef.current = preset.values;
+    guideEmitTimersRef.current.forEach((timerId) => window.clearTimeout(timerId));
+    guideEmitTimersRef.current = [];
+    [0, 140, 300, 480].forEach((delay, index) => {
+      const emit = () => onGesture?.({
+        ...gesture,
+        confidence: Math.max(0.76, gesture.confidence - index * 0.05),
+      });
+      if (delay === 0) {
+        emit();
+        return;
+      }
+      const timerId = window.setTimeout(emit, delay);
+      guideEmitTimersRef.current.push(timerId);
+    });
+    setPoseInfo({
+      label: preset.label,
+      confidence: gesture.confidence,
+      hint: preset.hint,
+    });
+  }
 }
 
 async function createVisionModels({ PoseLandmarker, HandLandmarker, resolver }) {
@@ -395,7 +435,7 @@ function estimateGesture(frame, previous, guideId, stable, now) {
   const confidence = clamp(scores[id], 0, 1);
   const stableCount = stable.id === id ? stable.count + 1 : 1;
   const stableSince = stable.id === id ? stable.since : now;
-  const confirmed = confidence > 0.34 && stableCount >= 2 && now - stableSince >= GESTURE_LOCK_MS;
+  const confirmed = confidence > 0.28 && stableCount >= 2 && now - stableSince >= GESTURE_LOCK_MS;
   const preset = createGesturePreset(id, source);
 
   return {
@@ -407,10 +447,10 @@ function estimateGesture(frame, previous, guideId, stable, now) {
     confirmed,
     stable: { id, since: stableSince, count: stableCount },
     values: confirmed ? preset.values : {
-      glow: preset.values.glow * 0.44,
-      hold: preset.values.hold * 0.54,
+      glow: preset.values.glow * 0.58,
+      hold: preset.values.hold * 0.64,
       slow: preset.values.slow,
-      wind: preset.values.wind * 0.4,
+      wind: preset.values.wind * 0.56,
     },
   };
 }

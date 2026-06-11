@@ -19,6 +19,7 @@ import { SparkleIcon as Sparkle } from '@phosphor-icons/react/dist/csr/Sparkle';
 import { StarIcon as Star } from '@phosphor-icons/react/dist/csr/Star';
 import { SunHorizonIcon as SunHorizon } from '@phosphor-icons/react/dist/csr/SunHorizon';
 import { TreeIcon as Tree } from '@phosphor-icons/react/dist/csr/Tree';
+import { WindIcon as Wind } from '@phosphor-icons/react/dist/csr/Wind';
 import { WavesIcon as Waves } from '@phosphor-icons/react/dist/csr/Waves';
 import React from 'react';
 
@@ -47,8 +48,8 @@ const ICONS = {
   bridge: Bridge,
   stone: Path,
   moss: Plant,
-  windLine: Waves,
-  softWind: Waves,
+  windLine: Wind,
+  softWind: Wind,
   cloud: Cloud,
   windBell: Lamp,
   ribbon: Sparkle,
@@ -68,10 +69,10 @@ const ICONS = {
   shadow: Cloud,
 };
 
-function ElementSvgIcon({ toolId, size = 34 }) {
+function ElementSvgIcon({ toolId, size = 34, className = '' }) {
   const Icon = ICONS[toolId] || Sparkle;
   return (
-    <span className="external-svg-glyph" aria-hidden="true">
+    <span className={`external-svg-glyph ${className}`.trim()} aria-hidden="true">
       <Icon size={size} weight="duotone" />
     </span>
   );

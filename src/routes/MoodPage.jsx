@@ -18,7 +18,7 @@ function MoodPage({ selectedMood, selectedToolId, gardenDay, onSelectMood, onCon
         <div className="section-heading">
           <p className="eyebrow">{gardenDay.name}</p>
           <h2>今天先放哪个元素？</h2>
-          <p>选一个作为起点。进入画布后，也可以切换或自由画。</p>
+          <p>可以选一个作为起点，也可以什么都不选，进入后自由画。</p>
         </div>
         <div className="mood-grid" aria-label="今日元素入口">
           {sceneEntries.map((entry) => (
@@ -31,8 +31,8 @@ function MoodPage({ selectedMood, selectedToolId, gardenDay, onSelectMood, onCon
           ))}
         </div>
         <div className="page-bottom-row">
-          <p>{selectedToolId ? '已选好起点，可以进入花园。' : '选一个元素，或返回重新选择日期。'}</p>
-          <SoftButton onClick={onContinue} disabled={!selectedMood}>
+          <p>{selectedToolId ? '已选好起点，可以进入花园。' : '不选也可以进入，系统会按笔触自由判断。'}</p>
+          <SoftButton onClick={onContinue}>
             <Sparkles size={22} />
             进入准备页
           </SoftButton>
@@ -74,7 +74,7 @@ function createToolEntryText(tool, dayName) {
     firstFlower: '打开一朵小花。',
     waterLine: '让小溪流动。',
     ripple: '让水面散开。',
-    leafBoat: '放一只叶船。',
+    leafBoat: '放一只叶舟。',
     bridge: '接上一段小桥。',
     rainDrop: '落下一点雨。',
     reed: '长出岸边芦苇。',
