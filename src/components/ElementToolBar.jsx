@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import AnimatedQuickDrawGlyph from './AnimatedQuickDrawGlyph';
 import { getToolElement, toolIds } from '../data/toolElementMap';
 
 function ElementToolBar({ activeToolId, onSelectTool, toolOrder = toolIds }) {
@@ -9,6 +8,22 @@ function ElementToolBar({ activeToolId, onSelectTool, toolOrder = toolIds }) {
 
   return (
     <aside className="element-toolbar" aria-label="元素工具栏">
+      <button
+        className={`tool-button element-tool-button element-tool-button--free ${activeToolId ? '' : 'active'}`}
+        onClick={() => onSelectTool(null)}
+        style={{ '--tool-color': '#8f7ca7', color: '#8f7ca7' }}
+        title="不选择固定元素，按笔触方向轻轻回应。"
+        type="button"
+      >
+        <span className="element-tool-button__glyph" aria-hidden="true">
+          <span className="free-draw-mark">
+            <span />
+            <span />
+            <span />
+          </span>
+        </span>
+        <span className="element-tool-button__label">自由画</span>
+      </button>
       {visibleToolIds.map((toolId, index) => {
         const tool = getToolElement(toolId);
         const active = activeToolId === toolId;
@@ -16,23 +31,21 @@ function ElementToolBar({ activeToolId, onSelectTool, toolOrder = toolIds }) {
         return (
           <button
             key={toolId}
-            className={`element-tool-button ${active ? 'active' : ''}`}
+            className={`tool-button element-tool-button ${active ? 'active' : ''}`}
             onClick={() => onSelectTool(toolId)}
             style={{ '--tool-color': tool.color || 'var(--ink)', color: tool.color || 'var(--ink)' }}
             title={tool.feedbackText}
             type="button"
           >
             <span className="element-tool-button__glyph" aria-hidden="true">
-              <AnimatedQuickDrawGlyph
-                toolId={toolId}
-                variantIndex={index % 3}
-                size={48}
-                tone="currentColor"
-                animated
-                delay={index * 24}
-                strokeWidth={4.2}
-                label={tool.label}
-              />
+              <span className={`tool-button__glyph-art tool-entry tool-entry-${toolId}`}>
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+              </span>
             </span>
             <span className="element-tool-button__label">{tool.label}</span>
           </button>

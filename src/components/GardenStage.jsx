@@ -1,5 +1,4 @@
 import React from 'react';
-import QuickDrawElementLayer from './QuickDrawElementLayer';
 import { initialSceneState } from '../utils/sceneState';
 
 function GardenStage({
@@ -82,7 +81,11 @@ function GardenStage({
       )}
       <div className="soil-wetness" />
       <span className="gesture-wind-ribbon" />
-      <QuickDrawElementLayer items={[...elementHistory, ...liveResponses]} sceneState={sceneState} />
+      <div className="breathscape-element-layer" aria-hidden="true">
+        {[...elementHistory, ...liveResponses].map((item, index) => (
+          <ResponseCluster item={item} index={index} live={Boolean(item.live)} key={item.id || `${item.tool}-${index}`} />
+        ))}
+      </div>
       <span className="lamp-aura" aria-hidden="true" />
       {children}
     </div>

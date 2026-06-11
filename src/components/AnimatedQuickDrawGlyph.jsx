@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getQuickDrawAsset, getQuickDrawAssetVariant } from '../data/quickdrawAssets';
+import { getToolElement } from '../data/toolElementMap';
 
 const svgPathCache = new Map();
 const defaultSvgAsset = { paths: [], viewBox: '0 0 256 256' };
@@ -21,18 +21,18 @@ function AnimatedQuickDrawGlyph({
   label,
   style,
 }) {
-  const asset = getQuickDrawAsset(toolId);
-  const variant = getQuickDrawAssetVariant(toolId, variantIndex) || asset.toolbarGlyph || asset.assetVariants?.[0];
-  const resolvedAssetPath = assetPath || variant?.assetPath;
+  const asset = getToolElement(toolId);
+  const variants = asset.assetVariants || [];
+  const variant = variants[((variantIndex % variants.length) + variants.length) % variants.length] || asset.toolbarGlyph || variants[0];
+  const resolvedAssetPath = assetPath;
   const externalAsset = useSvgAsset(resolvedAssetPath);
-  if (!resolvedAssetPath) return null;
-  const paths = externalAsset.paths;
+  const paths = resolvedAssetPath ? externalAsset.paths : normalizeVariantPaths(variant?.paths);
   if (!paths.length) return null;
 
   return (
     <svg
       className={`animated-quickdraw-glyph ${className}`.trim()}
-      viewBox={resolvedAssetPath ? externalAsset.viewBox : variant.viewBox || '0 0 256 256'}
+      viewBox={resolvedAssetPath ? externalAsset.viewBox : variant?.viewBox || '0 0 256 256'}
       width={width || size}
       height={height || size}
       role={label ? 'img' : 'presentation'}
@@ -54,7 +54,7 @@ function AnimatedQuickDrawGlyph({
           pathLength="100"
           fill="none"
           stroke="currentColor"
-          strokeWidth={resolvedAssetPath ? path.strokeWidth || 8 : strokeWidth || variant.strokeWidth || 5}
+          strokeWidth={resolvedAssetPath ? path.strokeWidth || 8 : strokeWidth || variant?.strokeWidth || 5}
           strokeLinecap="round"
           strokeLinejoin="round"
           style={animated ? { animationDelay: `${delay + index * 34}ms` } : undefined}
@@ -94,6 +94,12 @@ function useSvgAsset(assetPath) {
   }, [assetPath]);
 
   return asset;
+}
+
+function normalizeVariantPaths(paths = []) {
+  return paths
+    .map((path) => (typeof path === 'string' ? { d: path } : path))
+    .filter((path) => path?.d);
 }
 
 function parseQuickDrawSvg(svg) {

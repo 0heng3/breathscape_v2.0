@@ -10,10 +10,12 @@ function CanvasPage({
   gardenDay,
   sceneState,
   activeTool,
+  selectedToolId,
   feedback,
   strokes,
   elementHistory,
   liveResponses,
+  clearTraceSignal,
   onSelectTool,
   onStroke,
   onStrokeMove,
@@ -22,16 +24,13 @@ function CanvasPage({
 }) {
   return (
     <section className="screen canvas-page page-enter">
-      <div className="garden-workbar">
-        <p>{feedback || '直接画你想到的小元素，系统会先识别，再整理成 QuickDraw 风格。'}</p>
-      </div>
-      <ElementToolBar activeToolId={activeTool.id} onSelectTool={onSelectTool} toolOrder={gardenDay.tools} />
+      <ElementToolBar activeToolId={selectedToolId} onSelectTool={onSelectTool} toolOrder={gardenDay.tools} />
       <div className="canvas-stage">
         <GardenStage mood={mood} gardenDay={gardenDay} sceneState={sceneState} elementHistory={elementHistory} liveResponses={liveResponses}>
-          <DrawingCanvas activeTool={activeTool} onStroke={onStroke} onStrokeMove={onStrokeMove} />
+          <DrawingCanvas activeTool={activeTool} onStroke={onStroke} onStrokeMove={onStrokeMove} clearTraceSignal={clearTraceSignal} />
           <div className="canvas-caption">
             <Volume2 size={18} />
-            <span>直接画出来；下方图标是今天可识别的元素参考，不需要先点选。</span>
+            <span>可以连续画多笔；停下来后，我会把整组线条一起识别整理。</span>
           </div>
         </GardenStage>
       </div>
@@ -40,6 +39,7 @@ function CanvasPage({
           feedback={feedback}
           sceneState={sceneState}
           activeTool={activeTool}
+          selectedToolId={selectedToolId}
           canFinish={strokes.length > 0}
           onFinish={onFinish}
           onSuggest={onSuggest}

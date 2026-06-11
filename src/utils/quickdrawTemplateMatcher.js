@@ -65,12 +65,12 @@ function compareSignatures(a, b) {
   const bf = b.features;
   const featureDistance =
     Math.abs(Math.log(clamp(af.aspect, 0.08, 12)) - Math.log(clamp(bf.aspect, 0.08, 12))) * 0.11
-    + Math.abs(af.closedness - bf.closedness) * 0.16
-    + Math.abs(af.turnRate - bf.turnRate) * 0.13
+    + Math.abs(af.closedness - bf.closedness) * 0.22
+    + Math.abs(af.turnRate - bf.turnRate) * 0.17
     + Math.hypot(af.directionX - bf.directionX, af.directionY - bf.directionY) * 0.09
-    + Math.min(1, Math.abs((af.strokeCount || 1) - (bf.strokeCount || 1)) / 4) * 0.04;
+    + Math.min(1, Math.abs((af.strokeCount || 1) - (bf.strokeCount || 1)) / 4) * 0.13;
 
-  return pointDistance * 0.72 + featureDistance;
+  return pointDistance * 0.66 + featureDistance;
 }
 
 function scoreToConfidence(score) {

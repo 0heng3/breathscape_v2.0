@@ -1,0 +1,557 @@
+{
+  "type": "quickdraw-torch-cnn-sketch-v1",
+  "target": "tool",
+  "imageSize": 64,
+  "labels": [
+    "bridge",
+    "seed",
+    "cloud",
+    "firstFlower",
+    "grass",
+    "windLine",
+    "lantern",
+    "leafBoat",
+    "breathLight",
+    "moon",
+    "mushroom",
+    "waterLine",
+    "ripple",
+    "stone",
+    "rainDrop",
+    "rainbow",
+    "snailTrail",
+    "star",
+    "sunlight",
+    "smallTree"
+  ],
+  "sourceCategories": [
+    "bridge",
+    "circle",
+    "cloud",
+    "flower",
+    "grass",
+    "hurricane",
+    "lantern",
+    "leaf",
+    "light bulb",
+    "line",
+    "moon",
+    "mushroom",
+    "ocean",
+    "pond",
+    "potato",
+    "rain",
+    "rainbow",
+    "river",
+    "snail",
+    "squiggle",
+    "star",
+    "sun",
+    "tree",
+    "tornado",
+    "windmill"
+  ],
+  "categoryToOutput": {
+    "bridge": "bridge",
+    "circle": "seed",
+    "cloud": "cloud",
+    "flower": "firstFlower",
+    "grass": "grass",
+    "hurricane": "windLine",
+    "lantern": "lantern",
+    "leaf": "leafBoat",
+    "light bulb": "breathLight",
+    "line": "windLine",
+    "moon": "moon",
+    "mushroom": "mushroom",
+    "ocean": "waterLine",
+    "pond": "ripple",
+    "potato": "stone",
+    "rain": "rainDrop",
+    "rainbow": "rainbow",
+    "river": "waterLine",
+    "snail": "snailTrail",
+    "squiggle": "windLine",
+    "star": "star",
+    "sun": "sunlight",
+    "tree": "smallTree",
+    "tornado": "windLine",
+    "windmill": "windLine"
+  },
+  "categoryToTool": {
+    "bridge": "bridge",
+    "seed": "seed",
+    "cloud": "cloud",
+    "firstFlower": "firstFlower",
+    "grass": "grass",
+    "windLine": "windLine",
+    "lantern": "lantern",
+    "leafBoat": "leafBoat",
+    "breathLight": "breathLight",
+    "moon": "moon",
+    "mushroom": "mushroom",
+    "waterLine": "waterLine",
+    "ripple": "ripple",
+    "stone": "stone",
+    "rainDrop": "rainDrop",
+    "rainbow": "rainbow",
+    "snailTrail": "snailTrail",
+    "star": "star",
+    "sunlight": "sunlight",
+    "smallTree": "smallTree"
+  },
+  "trainCount": 75000,
+  "validationCount": 16250,
+  "maxPerCategory": 3000,
+  "validationPerCategory": 650,
+  "epochs": 24,
+  "batchSize": 96,
+  "augmentation": true,
+  "cacheDir": "quickdraw_cache",
+  "network": "resnet32-64-128-192-gap-dense192",
+  "architecture": "resnet",
+  "bestValidationAccuracy": 0.9676,
+  "mappedToolAccuracy": 0.9676,
+  "perCategoryAccuracy": {
+    "bridge": 0.9877,
+    "seed": 0.9831,
+    "cloud": 0.98,
+    "firstFlower": 0.9938,
+    "grass": 0.9815,
+    "windLine": 0.9471,
+    "lantern": 0.98,
+    "leafBoat": 0.98,
+    "breathLight": 0.9831,
+    "moon": 0.8462,
+    "mushroom": 0.9892,
+    "waterLine": 0.9669,
+    "ripple": 0.9031,
+    "stone": 0.9462,
+    "rainDrop": 0.9877,
+    "rainbow": 0.9969,
+    "snailTrail": 0.9938,
+    "star": 0.9938,
+    "sunlight": 0.9969,
+    "smallTree": 0.9985
+  },
+  "confusionTop": {
+    "bridge": [
+      {
+        "label": "windLine",
+        "count": 3
+      },
+      {
+        "label": "rainbow",
+        "count": 2
+      },
+      {
+        "label": "cloud",
+        "count": 1
+      }
+    ],
+    "seed": [
+      {
+        "label": "moon",
+        "count": 6
+      },
+      {
+        "label": "mushroom",
+        "count": 3
+      },
+      {
+        "label": "lantern",
+        "count": 1
+      }
+    ],
+    "cloud": [
+      {
+        "label": "mushroom",
+        "count": 5
+      },
+      {
+        "label": "windLine",
+        "count": 4
+      },
+      {
+        "label": "breathLight",
+        "count": 2
+      }
+    ],
+    "firstFlower": [
+      {
+        "label": "cloud",
+        "count": 1
+      },
+      {
+        "label": "windLine",
+        "count": 1
+      },
+      {
+        "label": "lantern",
+        "count": 1
+      }
+    ],
+    "grass": [
+      {
+        "label": "windLine",
+        "count": 7
+      },
+      {
+        "label": "bridge",
+        "count": 3
+      },
+      {
+        "label": "waterLine",
+        "count": 2
+      }
+    ],
+    "windLine": [
+      {
+        "label": "waterLine",
+        "count": 117
+      },
+      {
+        "label": "snailTrail",
+        "count": 9
+      },
+      {
+        "label": "rainDrop",
+        "count": 8
+      }
+    ],
+    "lantern": [
+      {
+        "label": "breathLight",
+        "count": 8
+      },
+      {
+        "label": "windLine",
+        "count": 3
+      },
+      {
+        "label": "leafBoat",
+        "count": 1
+      }
+    ],
+    "leafBoat": [
+      {
+        "label": "lantern",
+        "count": 5
+      },
+      {
+        "label": "windLine",
+        "count": 4
+      },
+      {
+        "label": "seed",
+        "count": 2
+      }
+    ],
+    "breathLight": [
+      {
+        "label": "mushroom",
+        "count": 6
+      },
+      {
+        "label": "lantern",
+        "count": 3
+      },
+      {
+        "label": "windLine",
+        "count": 1
+      }
+    ],
+    "moon": [
+      {
+        "label": "seed",
+        "count": 87
+      },
+      {
+        "label": "leafBoat",
+        "count": 8
+      },
+      {
+        "label": "windLine",
+        "count": 3
+      }
+    ],
+    "mushroom": [
+      {
+        "label": "breathLight",
+        "count": 4
+      },
+      {
+        "label": "windLine",
+        "count": 2
+      },
+      {
+        "label": "leafBoat",
+        "count": 1
+      }
+    ],
+    "waterLine": [
+      {
+        "label": "windLine",
+        "count": 34
+      },
+      {
+        "label": "ripple",
+        "count": 4
+      },
+      {
+        "label": "grass",
+        "count": 2
+      }
+    ],
+    "ripple": [
+      {
+        "label": "stone",
+        "count": 48
+      },
+      {
+        "label": "waterLine",
+        "count": 5
+      },
+      {
+        "label": "rainbow",
+        "count": 5
+      }
+    ],
+    "stone": [
+      {
+        "label": "ripple",
+        "count": 25
+      },
+      {
+        "label": "sunlight",
+        "count": 5
+      },
+      {
+        "label": "windLine",
+        "count": 3
+      }
+    ],
+    "rainDrop": [
+      {
+        "label": "windLine",
+        "count": 6
+      },
+      {
+        "label": "ripple",
+        "count": 2
+      }
+    ],
+    "rainbow": [
+      {
+        "label": "waterLine",
+        "count": 2
+      }
+    ],
+    "snailTrail": [
+      {
+        "label": "windLine",
+        "count": 4
+      }
+    ],
+    "star": [
+      {
+        "label": "windLine",
+        "count": 2
+      },
+      {
+        "label": "bridge",
+        "count": 1
+      },
+      {
+        "label": "sunlight",
+        "count": 1
+      }
+    ],
+    "sunlight": [
+      {
+        "label": "windLine",
+        "count": 1
+      },
+      {
+        "label": "rainDrop",
+        "count": 1
+      }
+    ],
+    "smallTree": [
+      {
+        "label": "rainDrop",
+        "count": 1
+      }
+    ]
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "loss": 1.975,
+      "accuracy": 0.3831,
+      "valLoss": 1.1895,
+      "valAccuracy": 0.6166
+    },
+    {
+      "epoch": 2,
+      "loss": 0.9756,
+      "accuracy": 0.6875,
+      "valLoss": 0.655,
+      "valAccuracy": 0.7791
+    },
+    {
+      "epoch": 3,
+      "loss": 0.6133,
+      "accuracy": 0.8058,
+      "valLoss": 0.4077,
+      "valAccuracy": 0.8709
+    },
+    {
+      "epoch": 4,
+      "loss": 0.4622,
+      "accuracy": 0.8536,
+      "valLoss": 0.4369,
+      "valAccuracy": 0.8608
+    },
+    {
+      "epoch": 5,
+      "loss": 0.394,
+      "accuracy": 0.8757,
+      "valLoss": 0.2773,
+      "valAccuracy": 0.9055
+    },
+    {
+      "epoch": 6,
+      "loss": 0.3303,
+      "accuracy": 0.8955,
+      "valLoss": 0.2435,
+      "valAccuracy": 0.9209
+    },
+    {
+      "epoch": 7,
+      "loss": 0.2992,
+      "accuracy": 0.9049,
+      "valLoss": 0.2258,
+      "valAccuracy": 0.9244
+    },
+    {
+      "epoch": 8,
+      "loss": 0.275,
+      "accuracy": 0.9116,
+      "valLoss": 0.1987,
+      "valAccuracy": 0.9329
+    },
+    {
+      "epoch": 9,
+      "loss": 0.246,
+      "accuracy": 0.9197,
+      "valLoss": 0.2602,
+      "valAccuracy": 0.9146
+    },
+    {
+      "epoch": 10,
+      "loss": 0.2303,
+      "accuracy": 0.9245,
+      "valLoss": 0.1982,
+      "valAccuracy": 0.9345
+    },
+    {
+      "epoch": 11,
+      "loss": 0.2161,
+      "accuracy": 0.9287,
+      "valLoss": 0.1704,
+      "valAccuracy": 0.943
+    },
+    {
+      "epoch": 12,
+      "loss": 0.2028,
+      "accuracy": 0.9327,
+      "valLoss": 0.1533,
+      "valAccuracy": 0.9487
+    },
+    {
+      "epoch": 13,
+      "loss": 0.1876,
+      "accuracy": 0.9371,
+      "valLoss": 0.1649,
+      "valAccuracy": 0.9438
+    },
+    {
+      "epoch": 14,
+      "loss": 0.1815,
+      "accuracy": 0.9394,
+      "valLoss": 0.2707,
+      "valAccuracy": 0.9119
+    },
+    {
+      "epoch": 15,
+      "loss": 0.1724,
+      "accuracy": 0.9428,
+      "valLoss": 0.1289,
+      "valAccuracy": 0.9578
+    },
+    {
+      "epoch": 16,
+      "loss": 0.1619,
+      "accuracy": 0.9452,
+      "valLoss": 0.1744,
+      "valAccuracy": 0.9406
+    },
+    {
+      "epoch": 17,
+      "loss": 0.1567,
+      "accuracy": 0.9478,
+      "valLoss": 0.1671,
+      "valAccuracy": 0.9462
+    },
+    {
+      "epoch": 18,
+      "loss": 0.1524,
+      "accuracy": 0.9495,
+      "valLoss": 0.1172,
+      "valAccuracy": 0.9603
+    },
+    {
+      "epoch": 19,
+      "loss": 0.1416,
+      "accuracy": 0.953,
+      "valLoss": 0.2038,
+      "valAccuracy": 0.9327
+    },
+    {
+      "epoch": 20,
+      "loss": 0.1368,
+      "accuracy": 0.9538,
+      "valLoss": 0.1604,
+      "valAccuracy": 0.9462
+    },
+    {
+      "epoch": 21,
+      "loss": 0.1344,
+      "accuracy": 0.9537,
+      "valLoss": 0.1103,
+      "valAccuracy": 0.9636
+    },
+    {
+      "epoch": 22,
+      "loss": 0.1264,
+      "accuracy": 0.9574,
+      "valLoss": 0.3998,
+      "valAccuracy": 0.8816
+    },
+    {
+      "epoch": 23,
+      "loss": 0.1236,
+      "accuracy": 0.9582,
+      "valLoss": 0.1224,
+      "valAccuracy": 0.9601
+    },
+    {
+      "epoch": 24,
+      "loss": 0.1163,
+      "accuracy": 0.9609,
+      "valLoss": 0.1027,
+      "valAccuracy": 0.9676
+    }
+  ]
+}

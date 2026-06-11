@@ -4,27 +4,30 @@ import SoftButton from './SoftButton';
 import { getToolElement } from '../data/toolElementMap';
 import { getSceneClues } from '../utils/sceneState';
 
-function FeedbackPanel({ feedback, sceneState, activeTool, toolTip, canFinish, onFinish, onSuggest }) {
-  const tool = getToolElement(activeTool.id);
+function FeedbackPanel({ feedback, sceneState, activeTool, selectedToolId, toolTip, canFinish, onFinish, onSuggest }) {
+  const freeDrawing = !selectedToolId;
+  const tool = freeDrawing ? null : getToolElement(activeTool.id);
   const clues = getSceneClues(sceneState);
-  const sceneLine = getToolSceneLine(activeTool.id);
+  const sceneLine = freeDrawing ? '按笔触方向回应。' : getToolSceneLine(activeTool.id);
+  const label = freeDrawing ? '自由画' : (tool.label || activeTool.label);
 
   return (
     <aside className="feedback-panel">
-      <div className="feedback-panel__current">
-        <span>最近识别</span>
-        <strong>{tool.label || activeTool.label}</strong>
+      <div className="lamp-dialogue compact feedback-panel__lamp">
+        <span className="lamp-face" aria-hidden="true">
+          <span />
+        </span>
+        <div>
+          <p className="eyebrow">小灯在回应</p>
+          <p className="feedback-panel__tool-tip">{feedback || toolTip || tool?.feedbackText}</p>
+        </div>
       </div>
-      <p className="feedback-panel__text">可以直接自由画，系统会在今天的元素里识别，再整理成 QuickDraw 风格。</p>
-      <p className="feedback-panel__tool-tip">{feedback || toolTip || tool.feedbackText}</p>
-      <p className="feedback-panel__scene-line">{sceneLine}</p>
+      <p className="active-tool-label">正在带来：{label}</p>
       <div className="scene-clues" aria-label="当前场景状态">
-        <span className="scene-clue-block__title">当前场景状态</span>
-        {clues.slice(0, 4).map((clue) => (
+        {[sceneLine, ...clues].filter(Boolean).slice(0, 2).map((clue) => (
           <span key={clue}>{clue}</span>
         ))}
       </div>
-      <p className="feedback-panel__next">下一步可以继续自由画，系统会继续识别并整理成当天花园里的元素。</p>
       <SoftButton variant="secondary" onClick={onSuggest}>
         <Lightbulb size={20} />
         给小灯一点光

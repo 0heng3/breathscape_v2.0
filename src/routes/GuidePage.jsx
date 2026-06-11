@@ -1,7 +1,6 @@
 import { Sprout } from 'lucide-react';
 import React from 'react';
 import GardenStage from '../components/GardenStage';
-import QuickDrawPreviewGlyph from '../components/QuickDrawPreviewGlyph';
 import SoftButton from '../components/SoftButton';
 import { getTool } from '../data/tools';
 
@@ -45,7 +44,16 @@ function GuidePage({ mood, gardenDay, sceneState, entryTool, onChooseTool, onFre
             const tool = getTool(toolId);
             return (
               <button key={toolId} onClick={() => onChooseTool(toolId)} style={{ '--tool-color': tool.color, color: tool.color }}>
-                <QuickDrawPreviewGlyph toolId={toolId} size={44} tone={tool.color} />
+                <span className="guide-tool-entry" aria-hidden="true">
+                  <span className={`tool-button__glyph-art tool-entry tool-entry-${toolId}`}>
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                    <span />
+                  </span>
+                </span>
                 {tool.label}
               </button>
             );

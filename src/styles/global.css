@@ -2389,6 +2389,14 @@ button:disabled {
   transform: translate(-50%, -50%);
 }
 
+.breathscape-element-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 26;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .response-cluster {
   width: 120px;
   height: 96px;
@@ -5191,9 +5199,15 @@ button:disabled {
 }
 
 .element-tool-button__glyph {
+  position: relative;
+  display: block;
   width: 48px;
   height: 48px;
   overflow: hidden;
+}
+
+.element-tool-button__glyph .tool-button__glyph-art.tool-entry {
+  transform: translate(-50%, -50%) scale(0.78);
 }
 
 .element-tool-button__label {
@@ -5295,6 +5309,46 @@ button:disabled {
   backdrop-filter: blur(12px);
 }
 
+.feedback-panel__lamp {
+  gap: 12px;
+}
+
+.lamp-face {
+  position: relative;
+  flex: 0 0 auto;
+  width: 54px;
+  height: 72px;
+  border-radius: 26px 26px 22px 22px;
+  background:
+    radial-gradient(circle at 36% 58%, #8f7ca7 0 2px, transparent 3px),
+    radial-gradient(circle at 66% 58%, #8f7ca7 0 2px, transparent 3px),
+    linear-gradient(180deg, #fff2a8 0%, #f8d976 70%, #e4be55 100%);
+  box-shadow: 0 12px 22px rgba(235, 190, 78, 0.28);
+}
+
+.lamp-face::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -18px;
+  width: 12px;
+  height: 22px;
+  border-radius: 999px;
+  background: #b79a66;
+  transform: translateX(-50%);
+}
+
+.lamp-face span {
+  position: absolute;
+  left: 50%;
+  bottom: 17px;
+  width: 14px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(143, 124, 167, 0.42);
+  transform: translateX(-50%);
+}
+
 .feedback-panel__current {
   display: grid;
   gap: 3px;
@@ -5336,6 +5390,16 @@ button:disabled {
   font-size: 14px;
   font-weight: 750;
   line-height: 1.35;
+}
+
+.feedback-panel .active-tool-label {
+  font-size: 15px;
+}
+
+.feedback-panel .scene-clues span {
+  flex: 1 1 100%;
+  font-size: 14px;
+  padding: 11px 14px;
 }
 
 .quickdraw-element--sway svg {
@@ -5392,6 +5456,125 @@ button:disabled {
 @keyframes qdElementSparkle {
   0%, 100% { opacity: 0.78; }
   50% { opacity: 1; }
+}
+
+/* Restore the first-version garden layout: canvas + right card + bottom tools. */
+.canvas-page {
+  grid-template-columns: minmax(0, 1fr) minmax(252px, 292px);
+  grid-template-rows: minmax(0, 1fr) 82px;
+  gap: 10px 12px;
+}
+
+.canvas-page .garden-workbar {
+  display: none;
+}
+
+.canvas-page > .canvas-stage {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.canvas-page > .feedback-dock {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.canvas-page > .element-toolbar {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: stretch;
+}
+
+.element-toolbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 6px 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius: 24px;
+}
+
+.element-tool-button.tool-button {
+  flex: 0 0 74px;
+  width: 74px;
+  height: 64px;
+  min-height: 64px;
+  grid-template-rows: 30px 18px;
+  gap: 1px;
+  padding: 8px 6px 7px;
+  border-radius: 22px;
+}
+
+.element-tool-button__glyph {
+  width: 58px;
+  height: 30px;
+}
+
+.element-tool-button__glyph .tool-button__glyph-art.tool-entry {
+  transform: translate(-50%, calc(-50% - 7px)) scale(0.56);
+}
+
+.element-tool-button__label {
+  max-width: 100%;
+  font-size: 14px;
+  line-height: 1.08;
+}
+
+.element-tool-button--more {
+  display: none;
+}
+
+.free-draw-mark {
+  position: relative;
+  display: block;
+  width: 58px;
+  height: 30px;
+}
+
+.free-draw-mark span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  width: 44px;
+  height: 10px;
+  border-top: 3px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.78;
+  transform-origin: center;
+}
+
+.free-draw-mark span:nth-child(1) {
+  transform: translate(-50%, -50%) rotate(-9deg);
+}
+
+.free-draw-mark span:nth-child(2) {
+  width: 36px;
+  transform: translate(-50%, calc(-50% + 7px)) rotate(5deg);
+}
+
+.free-draw-mark span:nth-child(3) {
+  width: 22px;
+  transform: translate(-50%, calc(-50% - 8px)) rotate(13deg);
+}
+
+.guide-tool-entry {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 28px;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.guide-tool-entry .tool-button__glyph-art.tool-entry {
+  transform: translate(-50%, calc(-50% - 6px)) scale(0.48);
 }
 
 @media (max-width: 900px) {

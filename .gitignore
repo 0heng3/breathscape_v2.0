@@ -4,6 +4,8 @@ dist/
 output/
 .playwright-cli/
 quickdraw_selected/*.ndjson
+quickdraw_cache/
+log_*.txt
 
 *.log
 *.local

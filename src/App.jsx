@@ -1,5 +1,5 @@
 import { ArrowLeft, BookOpen, Volume2, VolumeX } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { getGardenDay } from './data/gardenDays';
 import { getMood } from './data/moods';
 import { getTool } from './data/tools';
@@ -17,7 +17,10 @@ import { analyzeStroke, isValidStroke } from './utils/strokeAnalysis';
 import { createStory } from './utils/storyGenerator';
 import { getToolElement } from './data/toolElementMap';
 import { buildStampPlacements } from './utils/stampPlacement';
-import { recognizeSketchTool } from './utils/sketchRecognizer';
+import { createMultiStrokeDrawing, DEFAULT_DRAWING_SETTLE_MS } from './utils/multiStrokeSession';
+import { classifyWithQuickDrawModel, loadQuickDrawSketchModel } from './utils/quickdrawModelClassifier';
+import { mapQuickDrawCategoryToTool } from './data/quickdrawCategoryToolMap';
+import { classifyWithQuickDrawCnn, loadQuickDrawCnnModel } from './utils/quickdrawCnnClassifier';
 
 const routes = ['/start', '/mood-scene', '/guide', '/garden', '/breath', '/diary-card', '/diary-list'];
 
@@ -35,12 +38,20 @@ function App() {
   const [strokes, setStrokes] = useState([]);
   const [elementHistory, setElementHistory] = useState([]);
   const [liveResponses, setLiveResponses] = useState([]);
+  const [clearTraceSignal, setClearTraceSignal] = useState(0);
   const [sceneState, setSceneState] = useState(() => createInitialSceneState(null, 1));
-  const [feedback, setFeedback] = useState('直接在画布上自由画，系统会识别并整理成 QuickDraw 风格。');
+  const [feedback, setFeedback] = useState('直接在画布上自由画；停笔后系统会识别，并整理成花园里的柔和图案。');
   const [diaries, setDiaries] = useState(loadDiaries);
   const [viewingDiaryId, setViewingDiaryId] = useState(null);
   const [title, setTitle] = useState('今天的小花园');
   const [muted, setMuted] = useState(false);
+  const pendingStrokeSessionRef = useRef([]);
+  const settleTimerRef = useRef(null);
+  const elementHistoryRef = useRef([]);
+  const sceneStateRef = useRef(sceneState);
+  const selectedToolRef = useRef(selectedTool);
+  const quickdrawModelRef = useRef(null);
+  const quickdrawCnnRef = useRef(null);
 
   const mood = getMood(selectedScene);
   const gardenDay = getGardenDay(selectedDay);
@@ -59,6 +70,33 @@ function App() {
     saveDiaries(diaries);
   }, [diaries]);
 
+  useEffect(() => {
+    elementHistoryRef.current = elementHistory;
+  }, [elementHistory]);
+
+  useEffect(() => {
+    sceneStateRef.current = sceneState;
+  }, [sceneState]);
+
+  useEffect(() => {
+    selectedToolRef.current = selectedTool;
+  }, [selectedTool]);
+
+  useEffect(() => () => clearPendingDrawingTimer(), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadQuickDrawSketchModel().then((model) => {
+      if (!cancelled) quickdrawModelRef.current = model;
+    });
+    loadQuickDrawCnnModel().then((bundle) => {
+      if (!cancelled) quickdrawCnnRef.current = bundle;
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   function navigate(nextRoute) {
     const normalized = normalizeRoute(nextRoute);
     window.history.pushState({}, '', normalized);
@@ -66,16 +104,21 @@ function App() {
   }
 
   function resetGarden(day = selectedDay) {
+    clearPendingDrawingSession();
     const nextDay = getGardenDay(day);
     setSelectedScene(null);
     setSelectedDay(day);
     setSelectedTool(nextDay.tools[0] || 'seed');
+    selectedToolRef.current = nextDay.tools[0] || 'seed';
     setEntryTool(null);
     setStrokes([]);
     setElementHistory([]);
     setLiveResponses([]);
-    setSceneState(createInitialSceneState(null, day));
-    setFeedback(`${nextDay.name}已经准备好了。直接画你想到的小元素，我会先识别再整理。`);
+    setClearTraceSignal((value) => value + 1);
+    const initialState = createInitialSceneState(null, day);
+    sceneStateRef.current = initialState;
+    setSceneState(initialState);
+    setFeedback(`${nextDay.name}已经准备好了。先选一个元素，再在画布上画。`);
     setTitle(`${nextDay.name}日记`);
   }
 
@@ -93,8 +136,10 @@ function App() {
     setSelectedScene(sceneId);
     setEntryTool(preferredToolId);
     const nextState = createInitialSceneState(sceneId, selectedDay);
+    sceneStateRef.current = nextState;
     setSceneState(nextState);
     const recommended = preferredToolId || gardenDay.recommendedByMood?.[sceneId]?.[0] || gardenDay.tools[0] || 'seed';
+    selectedToolRef.current = recommended;
     setSelectedTool(recommended);
   }
 
@@ -119,78 +164,134 @@ function App() {
     const analyzed = analyzeStroke(rawStroke);
     if (!isValidStroke(analyzed)) {
       setFeedback('这一笔先被轻轻记住了。');
+      setClearTraceSignal((value) => value + 1);
       return;
     }
 
-    const recognition = recognizeSketchTool(analyzed, gardenDay.tools);
+    pendingStrokeSessionRef.current = [...pendingStrokeSessionRef.current, analyzed];
+    setFeedback(`我会等你停笔后再识别整理。当前已经记住 ${pendingStrokeSessionRef.current.length} 笔。`);
+    clearPendingDrawingTimer();
+    settleTimerRef.current = window.setTimeout(() => {
+      finalizePendingDrawing();
+    }, DEFAULT_DRAWING_SETTLE_MS);
+  }
+
+  function finalizePendingDrawing() {
+    clearPendingDrawingTimer();
+    const sessionStrokes = pendingStrokeSessionRef.current;
+    pendingStrokeSessionRef.current = [];
+    const drawing = createMultiStrokeDrawing(sessionStrokes);
+    if (!drawing || !isValidStroke(drawing)) {
+      setFeedback('这一组线条先被轻轻记住了。');
+      setClearTraceSignal((value) => value + 1);
+      return;
+    }
+
+    const currentSelectedTool = selectedToolRef.current;
+    const resolution = resolveDrawingTool(drawing, currentSelectedTool, gardenDay.tools, sceneStateRef.current, {
+      cnnModel: quickdrawCnnRef.current,
+      sketchModel: quickdrawModelRef.current,
+    });
+    const recognition = resolution.recognition;
     const toolId = recognition.toolId;
     const toolMeta = getToolElement(toolId);
-    const recentTools = elementHistory.map((item) => item.tool);
-    const stampPack = buildStampPlacements(analyzed, toolId, {
-      sceneState,
-      canvasWidth: analyzed.canvasWidth,
-      canvasHeight: analyzed.canvasHeight,
-      stageRect: analyzed.stageRect,
+    const recentTools = elementHistoryRef.current.map((item) => item.tool);
+    const tolerance = getCanvasTolerance(drawing, sceneStateRef.current, Boolean(currentSelectedTool));
+    const stampPack = buildStampPlacements(drawing, toolId, {
+      sceneState: sceneStateRef.current,
+      canvasWidth: drawing.canvasWidth,
+      canvasHeight: drawing.canvasHeight,
+      stageRect: drawing.stageRect,
       day: selectedDay,
     });
+    const placements = stampPack.placements.slice(0, tolerance.maxPlacements);
     const strokeRecord = {
-      ...analyzed,
+      ...drawing,
       tool: toolId,
-      elementCount: stampPack.count,
-      stampCount: stampPack.count,
-      stamps: stampPack.placements,
+      elementCount: placements.length,
+      stampCount: placements.length,
+      stamps: placements,
       feedbackText: toolMeta.feedbackText,
       recognition,
+      tolerance,
       quickdraw: {
-        ...(analyzed.quickdraw || {}),
-        placements: stampPack.placements,
+        ...(drawing.quickdraw || {}),
+        placements,
         recognition,
       },
     };
-    const nextState = updateSceneState(toolId, strokeRecord, sceneState);
-    const generated = stampPack.placements.map((placement, index) => ({
+    const generated = placements.map((placement, index) => ({
       ...stripHeavyPlacementFields(placement),
-      id: `${analyzed.id}-${index}`,
-      sourceStrokeId: analyzed.id,
-      strokeId: analyzed.id,
-      speed: analyzed.speedAvg,
-      density: analyzed.densityLocal,
-      length: analyzed.length,
-      direction: analyzed.direction,
-      canvasWidth: analyzed.canvasWidth,
-      canvasHeight: analyzed.canvasHeight,
-      quickdrawDrawing: analyzed.drawing,
-      quickdrawBoundingBox: analyzed.boundingBox,
+      id: `${drawing.id}-${index}`,
+      sourceStrokeId: drawing.id,
+      strokeId: drawing.id,
+      speed: drawing.speedAvg,
+      density: drawing.densityLocal,
+      length: drawing.length,
+      direction: drawing.direction,
+      canvasWidth: drawing.canvasWidth,
+      canvasHeight: drawing.canvasHeight,
+      quickdrawDrawing: drawing.drawing,
+      quickdrawBoundingBox: drawing.boundingBox,
       feedbackText: toolMeta.feedbackText,
       recognition,
+      tolerance,
     }));
+    const nextState = applyToleranceState(updateSceneState(toolId, strokeRecord, sceneStateRef.current), tolerance);
+    sceneStateRef.current = nextState;
 
     setStrokes((current) => [...current, strokeRecord]);
     setElementHistory((current) => [...current, ...generated]);
     setSceneState(nextState);
-    setSelectedTool(toolId);
-    setFeedback(createRecognitionFeedback(recognition, toolMeta, nextState, recentTools));
-    playElementTone(toolId, analyzed.speedAvg, muted);
+    setClearTraceSignal((value) => value + 1);
+    setFeedback(createRecognitionFeedback(recognition, toolMeta, nextState, recentTools, tolerance));
+    playElementTone(toolId, drawing.speedAvg, muted);
+  }
+
+  function clearPendingDrawingTimer() {
+    if (settleTimerRef.current) {
+      window.clearTimeout(settleTimerRef.current);
+      settleTimerRef.current = null;
+    }
+  }
+
+  function clearPendingDrawingSession() {
+    clearPendingDrawingTimer();
+    pendingStrokeSessionRef.current = [];
   }
 
   function handleStrokeMove(event) {
     if (event.phase === 'end') return;
     // During drawing, only the temporary black stroke is shown by DrawingCanvas.
-    // Recognition and QuickDraw element generation happen on pointer up.
+    // DrawingCanvas owns the temporary black stroke; recognition waits for the drawing session to settle.
   }
 
   function selectTool(toolId) {
+    if (!toolId) {
+      setSelectedTool(null);
+      selectedToolRef.current = null;
+      setFeedback('自由画打开了。我会按线条的速度、方向和密度轻轻回应。');
+      return;
+    }
     const toolMeta = getToolElement(toolId);
+    selectedToolRef.current = toolId;
     setSelectedTool(toolId);
     setFeedback(`${toolMeta.label || '这个元素'}已作为识别参考。你仍然可以自由画，系统会根据笔迹识别结果生成元素。`);
   }
 
   function enterBreath() {
+    if (pendingStrokeSessionRef.current.length) {
+      finalizePendingDrawing();
+    }
     navigate('/breath');
   }
 
   function handleSettleGesture(gesture) {
-    setSceneState((current) => applyGestureSettling(current, gesture));
+    setSceneState((current) => {
+      const nextState = applyGestureSettling(current, gesture);
+      sceneStateRef.current = nextState;
+      return nextState;
+    });
   }
 
   function openDiary(entry) {
@@ -200,11 +301,14 @@ function App() {
     setSelectedDay(day);
     setSelectedScene(entry.mood || null);
     setSelectedTool(nextDay.tools[0] || 'seed');
+    selectedToolRef.current = nextDay.tools[0] || 'seed';
     setEntryTool(null);
     setStrokes(entry.strokes || []);
     setElementHistory(entry.elementHistory || []);
     setLiveResponses([]);
-    setSceneState(entry.sceneState || createInitialSceneState(entry.mood, day));
+    const replayState = entry.sceneState || createInitialSceneState(entry.mood, day);
+    sceneStateRef.current = replayState;
+    setSceneState(replayState);
     setFeedback('可以轻轻回看这片花园。');
     setTitle(entry.title || `${nextDay.name}日记`);
     navigate('/breath');
@@ -212,6 +316,7 @@ function App() {
 
   function suggestLight() {
     const lightTool = gardenDay.tools.find((tool) => ['sun', 'sunlight', 'lantern', 'moon', 'star', 'breathLight', 'windowLight', 'moonbeam', 'firefly'].includes(tool)) || 'sunlight';
+    selectedToolRef.current = lightTool;
     setSelectedTool(lightTool);
     setFeedback('也可以给花园一点柔和的光。');
   }
@@ -229,7 +334,7 @@ function App() {
       elementHistory: elementHistory.map(stripHeavyPlacementFields),
       sceneState,
       story,
-      strokes: [],
+      strokes: strokes.map(stripStrokeForDiary),
     };
     const nextDiaries = [entry, ...diaries].slice(0, 21);
     setDiaries(nextDiaries);
@@ -245,6 +350,28 @@ function App() {
       ...lightPlacement
     } = placement;
     return lightPlacement;
+  }
+
+  function stripStrokeForDiary(stroke) {
+    return {
+      id: stroke.id,
+      tool: stroke.tool,
+      sourceStrokeIds: stroke.sourceStrokeIds || [],
+      points: (stroke.points || []).map((point) => ({
+        x: point.x,
+        y: point.y,
+        t: point.t,
+        pressure: point.pressure,
+      })),
+      canvasWidth: stroke.canvasWidth,
+      canvasHeight: stroke.canvasHeight,
+      length: stroke.length,
+      duration: stroke.duration,
+      densityLocal: stroke.densityLocal,
+      strokeCount: stroke.strokeCount,
+      recognition: stroke.recognition,
+      tolerance: stroke.tolerance,
+    };
   }
 
   function newGarden() {
@@ -293,10 +420,15 @@ function App() {
             sceneState={sceneState}
             entryTool={entryTool}
             onChooseTool={(toolId) => {
+              selectedToolRef.current = toolId;
               setSelectedTool(toolId);
               navigate('/garden');
             }}
-            onFreeChoose={() => navigate('/garden')}
+            onFreeChoose={() => {
+              selectedToolRef.current = null;
+              setSelectedTool(null);
+              navigate('/garden');
+            }}
           />
         )}
         {route === '/garden' && (
@@ -305,10 +437,12 @@ function App() {
             gardenDay={gardenDay}
             sceneState={sceneState}
             activeTool={activeTool}
+            selectedToolId={selectedTool}
             feedback={feedback}
             strokes={strokes}
             elementHistory={elementHistory}
             liveResponses={liveResponses}
+            clearTraceSignal={clearTraceSignal}
             onSelectTool={selectTool}
             onStroke={handleStroke}
             onStrokeMove={handleStrokeMove}
@@ -345,7 +479,181 @@ function App() {
   );
 }
 
-function createRecognitionFeedback(recognition, toolMeta, sceneState, recentTools) {
+function resolveDrawingTool(drawing, selectedToolId, availableTools, sceneState, models = {}) {
+  if (selectedToolId && availableTools.includes(selectedToolId)) {
+    const tool = getToolElement(selectedToolId);
+    return {
+      toolId: selectedToolId,
+      recognition: {
+        toolId: selectedToolId,
+        label: tool.label,
+        category: 'selected-intent',
+        confidence: 1,
+        lowConfidence: false,
+        reason: 'selected-intent',
+        alternatives: [],
+        categoryMatches: [],
+      },
+    };
+  }
+
+  const cnnPrediction = pickSceneAllowedPrediction(classifyWithQuickDrawCnn(drawing, models.cnnModel), drawing, availableTools);
+  const mappedCnnToolId = cnnPrediction?.toolId;
+  if (mappedCnnToolId && cnnPrediction.confidence >= 0.16) {
+    const tool = getToolElement(mappedCnnToolId);
+    return {
+      toolId: mappedCnnToolId,
+      recognition: {
+        toolId: mappedCnnToolId,
+        label: tool.label,
+        category: cnnPrediction.category,
+        confidence: cnnPrediction.confidence,
+        lowConfidence: cnnPrediction.confidence < 0.5,
+        reason: 'quickdraw-cnn',
+        alternatives: cnnPrediction.alternatives || [],
+        categoryMatches: cnnPrediction.alternatives || [],
+      },
+    };
+  }
+
+  const modelPrediction = pickSceneAllowedPrediction(classifyWithQuickDrawModel(drawing, models.sketchModel), drawing, availableTools);
+  const mappedModelToolId = modelPrediction?.toolId;
+  if (mappedModelToolId && modelPrediction.confidence >= 0.24) {
+    const tool = getToolElement(mappedModelToolId);
+    return {
+      toolId: mappedModelToolId,
+      recognition: {
+        toolId: mappedModelToolId,
+        label: tool.label,
+        category: modelPrediction.category,
+        confidence: modelPrediction.confidence,
+        lowConfidence: modelPrediction.confidence < 0.42,
+        reason: 'quickdraw-model',
+        alternatives: modelPrediction.alternatives || [],
+        categoryMatches: modelPrediction.alternatives || [],
+      },
+    };
+  }
+
+  const fallbackToolId = inferToolFromStrokeRules(drawing, availableTools, sceneState);
+  const tool = getToolElement(fallbackToolId);
+  return {
+    toolId: fallbackToolId,
+    recognition: {
+      toolId: fallbackToolId,
+      label: tool.label,
+      category: 'stroke-rule',
+      confidence: 0.62,
+      lowConfidence: false,
+      reason: 'stroke-rule',
+      alternatives: [],
+      categoryMatches: [],
+    },
+  };
+}
+
+function pickSceneAllowedPrediction(prediction, drawing, availableTools) {
+  if (!prediction) return null;
+  const ranked = prediction.alternatives?.length ? prediction.alternatives : [prediction];
+  for (const item of ranked) {
+    const toolId = item.category
+      ? mapQuickDrawCategoryToTool(item.category, drawing, availableTools)
+      : (availableTools.includes(item.toolId) ? item.toolId : null);
+    if (toolId) {
+      return {
+        ...item,
+        toolId,
+        alternatives: prediction.alternatives || [],
+        modelType: prediction.modelType,
+      };
+    }
+  }
+  return null;
+}
+
+function inferToolFromStrokeRules(drawing, availableTools, sceneState) {
+  const length = Number(drawing.length || 0);
+  const speed = Number(drawing.speedAvg || 0);
+  const density = Number(drawing.densityLocal || 0);
+  const direction = drawing.directionMain || drawing.direction;
+  const closedness = Number(drawing.closedness || 0);
+  const strokeCount = Number(drawing.strokeCount || 1);
+  const clutter = Number(sceneState.visualClutter || 0);
+  const compactness = getStrokeCompactness(drawing);
+
+  const pointCount = Number(drawing.pointCount || 0);
+  const highPointCrowding = pointCount > 760 && (strokeCount >= 3 || compactness > 3.6);
+  const sceneIsAlreadyCrowded = clutter > 0.9 && (strokeCount >= 3 || pointCount > 360);
+  if (strokeCount >= 6 || highPointCrowding || sceneIsAlreadyCrowded || (density > 0.82 && compactness > 4.8)) {
+    return firstAvailable(availableTools, ['cloud', 'softWind', 'windLine', 'soilLine', 'shadow']) || 'cloud';
+  }
+  if ((speed > 0.58 && length > 120) || (length > 240 && ['right', 'left', 'mixed'].includes(direction))) {
+    return firstAvailable(availableTools, ['windLine', 'wind', 'softWind', 'ribbon', 'cloud']) || 'windLine';
+  }
+  if (length < 90 && strokeCount >= 2) {
+    return firstAvailable(availableTools, ['rainDrop', 'rain', 'dew', 'puddle']) || 'rainDrop';
+  }
+  if (direction === 'up' || (drawing.vectorY < -0.36 && length < 180)) {
+    return firstAvailable(availableTools, ['grass', 'sprout', 'reed', 'seed']) || 'grass';
+  }
+  if (closedness > 0.48 || direction === 'loop') {
+    return firstAvailable(availableTools, ['sunlight', 'sun', 'breathLight', 'lantern', 'flower', 'firstFlower', 'bud']) || 'sunlight';
+  }
+  return firstAvailable(availableTools, ['grass', 'rainDrop', 'windLine', 'sunlight', 'flower']) || 'grass';
+}
+
+function getCanvasTolerance(drawing, sceneState, hasSelectedIntent) {
+  const density = Number(drawing.densityLocal || 0);
+  const pointCount = Number(drawing.pointCount || 0);
+  const strokeCount = Number(drawing.strokeCount || 1);
+  const clutter = Number(sceneState.visualClutter || 0);
+  const compactness = getStrokeCompactness(drawing);
+  const highPointCrowding = pointCount > 760 && (strokeCount >= 3 || compactness > 3.6);
+  const sceneIsAlreadyCrowded = clutter > 0.9 && (strokeCount >= 3 || pointCount > 360);
+  const crowded = strokeCount >= 7 || highPointCrowding || sceneIsAlreadyCrowded || (density > 0.82 && compactness > 4.8);
+  const maxPlacements = crowded ? (hasSelectedIntent ? 2 : 1) : 8;
+  return {
+    crowded,
+    maxPlacements,
+    traceOpacity: crowded ? 0.04 : 0.08,
+    atmosphere: crowded ? (hasSelectedIntent ? 'soft-light' : 'mist') : null,
+  };
+}
+
+function getStrokeCompactness(drawing) {
+  const bounds = drawing.boundingBox || {};
+  const diagonal = Math.hypot(Number(bounds.width || 1), Number(bounds.height || 1)) || 1;
+  return Number(drawing.length || 0) / diagonal;
+}
+
+function applyToleranceState(state, tolerance) {
+  if (!tolerance?.crowded) return state;
+  return {
+    ...state,
+    visualClutter: Math.min(1, (state.visualClutter || 0) + 0.03),
+    fogOpacity: Math.min(0.3, (state.fogOpacity || 0) + 0.045),
+    brightness: Math.min(0.96, (state.brightness || 0.72) + (tolerance.atmosphere === 'soft-light' ? 0.015 : 0)),
+    calmLevel: Math.min(1, (state.calmLevel || 0) + 0.02),
+  };
+}
+
+function firstAvailable(availableTools, candidates) {
+  return candidates.find((toolId) => availableTools.includes(toolId));
+}
+
+function createRecognitionFeedback(recognition, toolMeta, sceneState, recentTools, tolerance = {}) {
+  if (tolerance.crowded) {
+    return '这片线条有点多，花园先把它们轻轻收好。';
+  }
+  if (recognition?.reason === 'selected-intent') {
+    return `${toolMeta.label}来了。${getRecognitionSceneEffect(recognition.toolId) || createFeedback(recognition.toolId, sceneState, recentTools)}`;
+  }
+  if (recognition?.reason === 'stroke-rule') {
+    return `${toolMeta.label}来了。${getRecognitionSceneEffect(recognition.toolId) || createFeedback(recognition.toolId, sceneState, recentTools)}`;
+  }
+  if (recognition?.reason === 'quickdraw-model' || recognition?.reason === 'quickdraw-cnn') {
+    return `${toolMeta.label}来了。${getRecognitionSceneEffect(recognition.toolId) || createFeedback(recognition.toolId, sceneState, recentTools)}`;
+  }
   const base = getRecognitionSceneEffect(recognition.toolId) || createFeedback(recognition.toolId, sceneState, recentTools);
   if (!recognition || recognition.reason === 'no-template') {
     return `我先把这笔整理成${toolMeta.label}。${base}`;
@@ -353,7 +661,7 @@ function createRecognitionFeedback(recognition, toolMeta, sceneState, recentTool
   if (recognition.lowConfidence) {
     return `我从这笔里看见了一点${toolMeta.label}的样子，先把它整理成${toolMeta.label}。${base}`;
   }
-  return `我看见它像${toolMeta.label}，已经整理成 QuickDraw 风格。${base}`;
+  return `我看见它像${toolMeta.label}，已经整理成花园里的柔和图案。${base}`;
 }
 
 function getRecognitionSceneEffect(toolId) {

@@ -1,12 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import { getLocalStageRect, getStagePoint } from '../utils/coordinateUtils';
 
-function DrawingCanvas({ activeTool, onStroke, onStrokeMove }) {
+function DrawingCanvas({ activeTool, onStroke, onStrokeMove, clearTraceSignal = 0 }) {
   const canvasRef = useRef(null);
   const drawing = useRef(null);
   const traces = useRef([]);
   const canvasSize = useRef({ width: 0, height: 0 });
   const rafRef = useRef(0);
+
+  useEffect(() => {
+    traces.current = [];
+    redrawTraces(canvasRef.current, traces.current, performance.now());
+  }, [clearTraceSignal]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -29,8 +34,8 @@ function DrawingCanvas({ activeTool, onStroke, onStrokeMove }) {
 
   useEffect(() => {
     function tick(now) {
-      redrawTraces(canvasRef.current, traces.current, now);
-      traces.current = traces.current.filter((trace) => now - trace.createdAt < trace.fadeDuration);
+      redrawTraces(canvasRef.current, traces.current, now, drawing.current);
+      traces.current = traces.current.filter((trace) => trace.holdUntilRecognition || now - trace.createdAt < trace.fadeDuration);
       if (traces.current.length || drawing.current) {
         rafRef.current = window.requestAnimationFrame(tick);
       } else {
@@ -61,7 +66,7 @@ function DrawingCanvas({ activeTool, onStroke, onStrokeMove }) {
       // Some synthetic or interrupted pointer streams cannot be captured.
     }
     const point = getPoint(event);
-    redrawTraces(canvasRef.current, traces.current, point.t);
+    redrawTraces(canvasRef.current, traces.current, point.t, drawing.current);
     drawing.current = {
       id: crypto.randomUUID(),
       tool: activeTool.id,
@@ -92,19 +97,12 @@ function DrawingCanvas({ activeTool, onStroke, onStrokeMove }) {
     const previous = drawing.current.points[drawing.current.points.length - 1];
     const distance = Math.hypot(point.x - previous.x, point.y - previous.y);
     const deltaTime = Math.max(1, point.t - previous.t);
+    if (distance < 0.7 && deltaTime < 18) return;
     const speed = Math.min(1, distance / deltaTime / 1.2);
     drawing.current.length += distance;
     drawing.current.points.push(point);
 
-    const ctx = canvasRef.current.getContext('2d');
-    redrawTraces(canvasRef.current, traces.current, point.t);
-    ctx.strokeStyle = '#111111';
-    ctx.lineWidth = 2.6;
-    ctx.globalAlpha = 0.62;
-    ctx.filter = 'none';
-    drawSmoothPath(ctx, drawing.current.points);
-    ctx.stroke();
-    ctx.filter = 'none';
+    redrawTraces(canvasRef.current, traces.current, point.t, drawing.current);
     onStrokeMove?.({
       id: drawing.current.id,
       phase: 'move',
@@ -145,6 +143,7 @@ function DrawingCanvas({ activeTool, onStroke, onStrokeMove }) {
       ...stroke,
       createdAt: performance.now(),
       fadeDuration: 420,
+      holdUntilRecognition: true,
     };
     traces.current.push(rawTrace);
     redrawTraces(canvasRef.current, traces.current, rawTrace.createdAt);
@@ -172,8 +171,8 @@ function DrawingCanvas({ activeTool, onStroke, onStrokeMove }) {
 
     if (!rafRef.current) {
       rafRef.current = window.requestAnimationFrame(function tick(now) {
-        redrawTraces(canvasRef.current, traces.current, now);
-        traces.current = traces.current.filter((trace) => now - trace.createdAt < trace.fadeDuration);
+        redrawTraces(canvasRef.current, traces.current, now, drawing.current);
+        traces.current = traces.current.filter((trace) => trace.holdUntilRecognition || now - trace.createdAt < trace.fadeDuration);
         if (traces.current.length || drawing.current) {
           rafRef.current = window.requestAnimationFrame(tick);
         } else {
@@ -197,7 +196,7 @@ function DrawingCanvas({ activeTool, onStroke, onStrokeMove }) {
   );
 }
 
-function redrawTraces(canvas, items, now = performance.now()) {
+function redrawTraces(canvas, items, now = performance.now(), activeDrawing = null) {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const rect = canvas.getBoundingClientRect();
@@ -208,13 +207,21 @@ function redrawTraces(canvas, items, now = performance.now()) {
   ctx.filter = 'blur(0.1px)';
   items.forEach((trace) => {
     const age = now - (trace.createdAt || now);
-    const fade = clamp((1 - age / (trace.fadeDuration || 420)) * 0.08, 0.008, 0.06);
+    const fade = trace.holdUntilRecognition ? 0.48 : clamp((1 - age / (trace.fadeDuration || 420)) * 0.08, 0.008, 0.06);
     ctx.strokeStyle = '#111111';
-    ctx.lineWidth = 2.4;
+    ctx.lineWidth = trace.holdUntilRecognition ? 2.6 : 2.4;
     ctx.globalAlpha = fade;
     drawSmoothPath(ctx, trace.points);
     ctx.stroke();
   });
+  if (activeDrawing?.points?.length) {
+    ctx.filter = 'none';
+    ctx.strokeStyle = '#111111';
+    ctx.lineWidth = 2.6;
+    ctx.globalAlpha = 0.68;
+    drawSmoothPath(ctx, activeDrawing.points);
+    ctx.stroke();
+  }
   ctx.restore();
 }
 
