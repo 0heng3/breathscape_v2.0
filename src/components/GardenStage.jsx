@@ -181,7 +181,7 @@ function ResponseCluster({ item, index, live = false }) {
   const rawY = clampPercent(item.y, item.canvasHeight, 10, 86);
   const y = isGroundTool(item.tool) ? Math.max(rawY, 62) : rawY;
   const intensity = Math.min(1, Math.max(0.2, item.speed || item.density || 0.5));
-  const count = getResponseCount(item.tool, intensity);
+  const count = live ? getResponseCount(item.tool, intensity) : 1;
   const family = getToolFamily(item.tool);
   return (
     <span
@@ -245,6 +245,10 @@ function getResponseCount(tool, intensity) {
 }
 
 function getPieceStyle(tool, index) {
+  if (index === 0) {
+    const centered = getCenteredPieceStyle(tool);
+    if (centered) return centered;
+  }
   const row = Math.floor(index / 5);
   const col = index % 5;
   const spread = {
@@ -418,6 +422,76 @@ function getToolFamily(tool) {
 
 function isGroundTool(tool) {
   return ['grass', 'flower', 'seed', 'memorySeed', 'moss', 'stone', 'mushroom', 'sprout', 'bud', 'firstFlower', 'reed', 'quietFlower', 'bridge', 'soilLine', 'signpost', 'smallTree', 'snail'].includes(tool);
+}
+
+function getCenteredPieceStyle(tool) {
+  return {
+    '--p': 0,
+    '--dx': '0px',
+    '--dy': '0px',
+    '--piece-width': getCenteredPieceWidth(tool),
+    '--piece-height': getCenteredPieceHeight(tool),
+    '--piece-rotate': '0deg',
+    '--piece-bottom': '0px',
+    '--piece-delay': '0ms',
+  };
+}
+
+function getCenteredPieceWidth(tool) {
+  return {
+    wind: '76px',
+    windLine: '76px',
+    softWind: '76px',
+    cloud: '86px',
+    ribbon: '82px',
+    rainbow: '1px',
+    waterLine: '130px',
+    ripple: '56px',
+    puddle: '72px',
+    bridge: '76px',
+    signpost: '42px',
+    sun: '74px',
+    sunlight: '42px',
+    firstFlower: '42px',
+    flower: '46px',
+    quietFlower: '46px',
+    star: '34px',
+    firefly: '14px',
+    moonbeam: '36px',
+  }[tool];
+}
+
+function getCenteredPieceHeight(tool) {
+  return {
+    rain: '58px',
+    rainDrop: '24px',
+    dew: '14px',
+    grass: '54px',
+    reed: '58px',
+    sprout: '46px',
+    smallTree: '70px',
+    seed: '16px',
+    memorySeed: '16px',
+    moss: '12px',
+    sun: '4px',
+    sunlight: '42px',
+    firstFlower: '48px',
+    flower: '50px',
+    quietFlower: '50px',
+    lantern: '48px',
+    breathLight: '38px',
+    star: '34px',
+    firefly: '14px',
+    windowLight: '30px',
+    stone: '34px',
+    mushroom: '42px',
+    moon: '34px',
+    soilLine: '18px',
+    waterLine: '10px',
+    ripple: '28px',
+    windLine: '24px',
+    softWind: '24px',
+  }[tool];
 }
 
 function clampPercent(value, size, min, max) {

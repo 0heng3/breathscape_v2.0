@@ -15,7 +15,7 @@ const DIRECT_CATEGORY_TO_TOOL = {
   rain: 'rainDrop',
   rainbow: 'rainbow',
   river: 'waterLine',
-  snail: 'snail',
+  snail: 'mushroom',
   squiggle: 'windLine',
   star: 'star',
   sun: 'sunlight',
@@ -33,7 +33,8 @@ export function mapQuickDrawCategoryToTool(category, drawing, availableTools = [
 function getCategoryCandidates(category, drawing) {
   if (category === 'line') return mapLineLikeDrawing(drawing);
   if (category === 'circle') return mapCircleLikeDrawing(drawing);
-  if (category === 'squiggle') return ['windLine', 'softWind', 'ribbon', 'snail', 'soilLine'];
+  if (category === 'squiggle') return ['windLine', 'softWind', 'ribbon', 'soilLine', 'sprout'];
+  if (category === 'snail') return ['mushroom', 'sprout', 'soilLine'];
   if (category === 'hurricane' || category === 'tornado') return ['windLine', 'softWind', 'ribbon'];
   if (category === 'rain') return ['rainDrop', 'rain', 'dew'];
   if (category === 'ocean') return ['waterLine', 'ripple', 'puddle'];

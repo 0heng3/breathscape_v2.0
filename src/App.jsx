@@ -277,7 +277,7 @@ function App() {
       stageRect: drawing.stageRect,
       day: selectedDay,
     });
-    const placements = stampPack.placements.slice(0, tolerance.maxPlacements);
+    const placements = [pickSingleFinalPlacement(stampPack.placements, drawing, toolId)].filter(Boolean);
     const strokeRecord = {
       ...drawing,
       tool: toolId,
@@ -780,6 +780,51 @@ function getCanvasTolerance(drawing, sceneState, hasSelectedIntent) {
     traceOpacity: crowded ? 0.04 : 0.08,
     atmosphere: crowded ? (hasSelectedIntent ? 'soft-light' : 'mist') : null,
   };
+}
+
+function pickSingleFinalPlacement(placements, drawing, toolId) {
+  if (!placements?.length) return null;
+  const center = getDrawingCenter(drawing);
+  const chosen = placements.reduce((best, placement) => (
+    distanceToPoint(placement, center) < distanceToPoint(best, center) ? placement : best
+  ), placements[0]);
+  return {
+    ...chosen,
+    id: `${drawing.id || 'drawing'}-${toolId}-final`,
+    appearDelay: 0,
+    quickdrawPlacement: {
+      ...(chosen.quickdrawPlacement || {}),
+      count: 1,
+      index: 0,
+      selectedFrom: placements.length,
+      finalSingle: true,
+    },
+  };
+}
+
+function getDrawingCenter(drawing) {
+  const box = drawing.boundingBox || {};
+  if (Number.isFinite(box.x) && Number.isFinite(box.y) && Number.isFinite(box.width) && Number.isFinite(box.height)) {
+    return {
+      x: box.x + box.width / 2,
+      y: box.y + box.height / 2,
+    };
+  }
+  const points = drawing.points || [];
+  if (points.length) {
+    return {
+      x: points.reduce((sum, point) => sum + (Number(point.x) || 0), 0) / points.length,
+      y: points.reduce((sum, point) => sum + (Number(point.y) || 0), 0) / points.length,
+    };
+  }
+  return {
+    x: (drawing.canvasWidth || 720) / 2,
+    y: (drawing.canvasHeight || 540) / 2,
+  };
+}
+
+function distanceToPoint(placement, point) {
+  return Math.hypot((Number(placement?.x) || 0) - point.x, (Number(placement?.y) || 0) - point.y);
 }
 
 function getStrokeCompactness(drawing) {
